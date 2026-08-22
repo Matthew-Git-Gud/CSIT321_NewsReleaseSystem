@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import './App.css'
 
+// Defines the fields needed to render an article card.
 type Article = {
   id: number
   title: string
@@ -12,6 +13,7 @@ type Article = {
   accent: string
 }
 
+// Demo content shown in the latest-stories grid.
 const articles: Article[] = [
   {
     id: 1,
@@ -75,16 +77,19 @@ const articles: Article[] = [
   },
 ]
 
+// Build the category filters from the article data so the list stays in sync.
 const categories = ['All', ...Array.from(new Set(articles.map((article) => article.category)))]
 
 function App() {
   const [activeCategory, setActiveCategory] = useState('All')
   const [searchTerm, setSearchTerm] = useState('')
 
+  // Recalculate the visible cards only when the selected category or query changes.
   const filteredArticles = useMemo(() => {
     const query = searchTerm.trim().toLowerCase()
     return articles.filter((article) => {
       const matchesCategory = activeCategory === 'All' || article.category === activeCategory
+      // Search across the most useful reader-facing article fields.
       const matchesSearch = !query || `${article.title} ${article.excerpt} ${article.category}`.toLowerCase().includes(query)
       return matchesCategory && matchesSearch
     })
@@ -93,7 +98,7 @@ function App() {
   return (
     <main>
       <header className="site-header">
-        <a className="brand" href="#top" aria-label="Newsroom home">The Daily Post</a>
+        <a className="brand" href="#top" aria-label="Newsroom home">News Release System</a>
         <nav aria-label="Primary navigation">
           <a className="active" href="#latest">Latest</a>
           <a href="#categories">Categories</a>
@@ -101,7 +106,7 @@ function App() {
         </nav>
         <div className="header-actions">
           <button className="sign-in" type="button">Sign in</button>
-          <button className="join" type="button">Join us</button>
+          <button className="sign-in" type="button">Sign up</button>
         </div>
       </header>
 
@@ -143,6 +148,7 @@ function App() {
           ))}
         </div>
 
+        {/* Show matching article cards, or an actionable empty state when no results match. */}
         {filteredArticles.length ? (
           <div className="article-grid">
             {filteredArticles.map((article) => (
@@ -165,12 +171,13 @@ function App() {
           <div className="empty-state">
             <h3>No stories found</h3>
             <p>Try another search term or select a different category.</p>
+            {/* Restore the default view in one action. */}
             <button type="button" onClick={() => { setSearchTerm(''); setActiveCategory('All') }}>Clear filters</button>
           </div>
         )}
       </section>
 
-      <footer id="about">The Daily Post · A community news platform</footer>
+      <footer id="about">News Release System · A community news platform</footer>
     </main>
   )
 }
