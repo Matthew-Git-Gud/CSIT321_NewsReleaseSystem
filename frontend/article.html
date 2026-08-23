@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>NewsRelease - Article</title>
+
+    <link
+        rel="stylesheet"
+        href="article.css"
+    >
+</head>
+
+
+<body>
+    <!-- NAVIGATION BAR -->
+    <header class="navbar">
+
+        <div class="logo">
+            NewsRelease
+        </div>
+
+
+        <div class="nav-right">
+
+            <!-- Search -->
+            <input
+                type="text"
+                class="search-bar"
+                placeholder="Search"
+            >
+
+
+            <!-- Font size controls -->
+            <div class="nav-font-controls">
+
+                <button
+                    onclick="setTextSize('small')"
+                    class="font-small"
+                    data-font-size="small"
+                    title="Small text"
+                >
+                    A
+                </button>
+
+                <button
+                    onclick="setTextSize('medium')"
+                    class="font-medium"
+                    data-font-size="medium"
+                    title="Medium text"
+                >
+                    A
+                </button>
+
+                <button
+                    onclick="setTextSize('large')"
+                    class="font-large"
+                    data-font-size="large"
+                    title="Large text"
+                >
+                    A
+                </button>
+
+            </div>
+
+
+            <!-- Dark mode toggle --> 
+            <label class="switch">
+
+                <input
+                    type="checkbox"
+                    id="darkModeToggle"
+                >
+
+                <span class="slider"></span>
+
+            </label>
+
+
+            <!-- Account Buttons -->
+            <button
+                class="sign-in-btn"
+                onclick="openAuthModal('login')"
+            >
+                Sign In
+            </button>
+
+            <button
+                class="sign-up-btn"
+                onclick="openAuthModal('register')"
+            >
+                Sign Up
+            </button>
+
+        </div>
+
+    </header>
+
+
+
+    <!-- PAGE CONTENT -->
+    <div class="page-container">
+
+        <!-- LEFT SIDE - ARTICLE -->
+        <main class="article-section">
+
+            <!-- Category -->
+            <div class="category-label">
+                Information
+            </div>
+
+            <!-- Article title -->
+            <h1 class="article-title">
+
+                News today:
+                What readers are interested
+
+            </h1>
+
+
+
+            <!-- Article information -->
+
+            <div class="article-meta">
+
+                <span>
+                    By Jake
+                </span>
+
+                <span class="dot">
+                    •
+                </span>
+
+                <span>
+                    Jul 27, 2026
+                </span>
+
+                <span class="dot">
+                    •
+                </span>
+
+                <span>
+                    5 min read
+                </span>
+
+            </div>
+
+
+            <!-- IMAGE -->
+            <div class="image">
+
+                <span>
+                    Article Image
+                </span>
+
+            </div>
+
+
+
+            <!-- READING SETTINGS -->
+            <div class="reading-settings">
+
+
+                <!-- Text Size -->
+                <div class="setting-group">
+
+                    <span class="setting-label">
+                        Text size:
+                    </span>
+
+                    <button
+                        onclick="setArticleTextSize('small')"
+                        class="setting-button"
+                        data-font-size="small"
+                    >
+                        S
+                    </button>
+
+                    <button
+                        onclick="setArticleTextSize('medium')"
+                        class="setting-button active"
+                        data-font-size="medium"
+                    >
+                        M
+                    </button>
+
+                    <button
+                        onclick="setArticleTextSize('large')"
+                        class="setting-button"
+                        data-font-size="large"
+                    >
+                        L
+                    </button>
+
+                </div>
+
+
+
+                <!-- Light/Dark Mode -->
+                <div class="setting-group">
+
+                    <span class="setting-label">
+                        Mode:
+                    </span>
+
+                    <button
+                        onclick="setLightMode()"
+                        class="setting-button"
+                    >
+                        ☀ Light
+                    </button>
+
+                    <button
+                        onclick="setDarkMode()"
+                        class="setting-button"
+                    >
+                        🌙 Dark
+                    </button>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- ARTICLE CONTENT -->
+            <article
+                id="articleContent"
+                class="article-content"
+            >
+
+                <p> Current news today </p>
+
+            </article>
+
+
+
+            <!-- SOURCE -->
+            <div class="source-box">
+
+                <strong>
+                    Original Source:
+                </strong>
+
+                <a
+                    href="#"
+                    target="_blank"
+                >
+                    Example News
+                </a>
+
+            </div>
+
+
+
+            <!-- ARTICLE ACTIONS -->
+            <div class="article-actions">
+
+
+                <!-- Comment -->
+                <div class="action-card comment-card">
+
+                    <div class="action-icon">
+                        💬
+                    </div>
+
+                    <div>
+
+                        <h3>
+                            Join the conversation
+                        </h3>
+
+                        <p>
+                            Sign up to leave a comment
+                            on this article
+                        </p>
+
+                        <button onclick="openAuthModal('register')">
+                            Create Account
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- Share -->
+                <div class="action-card share-card">
+
+                    <div class="action-icon">
+                        📤
+                    </div>
+
+                    <div>
+
+                        <h3>
+                            Share this article
+                        </h3>
+
+                        <p>
+                            Sign in to share with
+                            your network
+                        </p>
+
+                        <button onclick="openAuthModal('login')">
+                            Create Account
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </main>
+
+
+
+        <!-- RIGHT SIDEBAR -->
+        <aside class="sidebar">
+
+
+            <!-- Trending -->
+            <div class="sidebar-card">
+
+                <div class="sidebar-heading">
+                    TRENDING
+                </div>
+
+
+                <ol class="trending-list">
+
+                    <li>
+                        Rate Decision Shocks Markets
+                    </li>
+
+                    <li>
+                        New Climate Accord Signed
+                    </li>
+
+                    <li>
+                        Tech Layoffs Continue
+                    </li>
+
+                </ol>
+
+            </div>
+
+
+
+            <!-- Stay Informed -->
+            <div class="stay-informed">
+
+                <h3>
+                    Stay informed
+                </h3>
+
+                <p>
+                    Get personalised news
+                    with a free account
+                </p>
+
+                <button onclick="openAuthModal('register')">
+                    Sign Up Free
+                </button>
+
+            </div>
+
+        </aside>
+
+
+    </div>
+
+
+
+    <!-- Sign In and Sign Up -->
+    <div
+        class="modal-overlay"
+        id="authOverlay"
+    >
+
+        <!-- LOGIN MODAL -->
+        <div
+            class="auth-modal"
+            id="loginModal"
+        >
+
+            <button
+                type="button"
+                class="modal-close"
+                onclick="closeAuthModal()"
+                aria-label="Close"
+            >
+                &times;
+            </button>
+
+            <h2 class="auth-title">
+                Welcome back
+            </h2>
+
+            <p class="auth-subtitle">
+                Sign in to your NewsRelease account
+            </p>
+
+            <div
+                class="auth-error"
+                id="loginError"
+            >
+                ⚠ Invalid credentials. Please try again.
+            </div>
+
+            <form
+                id="loginForm"
+                onsubmit="return handleLogin(event)"
+            >
+
+                <label
+                    class="auth-label"
+                    for="loginEmail"
+                >
+                    Email address
+                </label>
+
+                <input
+                    type="email"
+                    id="loginEmail"
+                    class="auth-input"
+                    placeholder="you@example.com"
+                >
+
+                <label
+                    class="auth-label"
+                    for="loginPassword"
+                >
+                    Password
+                </label>
+
+                <input
+                    type="password"
+                    id="loginPassword"
+                    class="auth-input"
+                    placeholder="••••••••"
+                >
+
+                <div class="auth-row">
+
+                    <label class="auth-checkbox">
+                        <input
+                            type="checkbox"
+                            id="rememberMe"
+                        >
+                        Remember me
+                    </label>
+
+                    <a
+                        href="#"
+                        class="auth-link"
+                        onclick="return false;"
+                    >
+                        Forgot password?
+                    </a>
+
+                </div>
+
+                <button
+                    type="submit"
+                    class="auth-submit"
+                >
+                    Sign In
+                </button>
+
+            </form>
+
+            <p class="auth-footer">
+                No account?
+                <a
+                    href="#"
+                    class="auth-link-strong"
+                    onclick="switchToSignUp(event)"
+                >
+                    Create one →
+                </a>
+            </p>
+
+        </div>
+
+
+
+        <!-- REGISTER MODAL -->
+        <div
+            class="auth-modal"
+            id="registerModal"
+        >
+
+            <button
+                type="button"
+                class="modal-close"
+                onclick="closeAuthModal()"
+                aria-label="Close"
+            >
+                &times;
+            </button>
+
+            <h2 class="auth-title">
+                Create your account
+            </h2>
+
+            <p class="auth-subtitle">
+                Join the NewsRelease community
+            </p>
+
+            <div
+                class="auth-error"
+                id="registerError"
+            >
+                ⚠ Please check the form and try again.
+            </div>
+
+            <form
+                id="registerForm"
+                onsubmit="return handleRegister(event)"
+            >
+
+                <div class="auth-name-grid">
+
+                    <div>
+                        <label
+                            class="auth-label"
+                            for="firstName"
+                        >
+                            First name
+                        </label>
+
+                        <input
+                            type="text"
+                            id="firstName"
+                            class="auth-input"
+                            placeholder="Bob"
+                        >
+                    </div>
+
+                    <div>
+                        <label
+                            class="auth-label"
+                            for="lastName"
+                        >
+                            Last name
+                        </label>
+
+                        <input
+                            type="text"
+                            id="lastName"
+                            class="auth-input"
+                            placeholder="Tan"
+                        >
+                    </div>
+
+                </div>
+
+                <label
+                    class="auth-label"
+                    for="username"
+                >
+                    Username
+                </label>
+
+                <input
+                    type="text"
+                    id="username"
+                    class="auth-input"
+                    placeholder="User123"
+                >
+
+                <label
+                    class="auth-label"
+                    for="registerEmail"
+                >
+                    Email address
+                </label>
+
+                <input
+                    type="email"
+                    id="registerEmail"
+                    class="auth-input"
+                    placeholder="user@example.com"
+                >
+
+                <label
+                    class="auth-label"
+                    for="registerPassword"
+                >
+                    Password
+                </label>
+
+                <input
+                    type="password"
+                    id="registerPassword"
+                    class="auth-input"
+                    placeholder="Min. 8 characters"
+                >
+
+                <label
+                    class="auth-label"
+                    for="confirmPassword"
+                >
+                    Confirm password
+                </label>
+
+                <input
+                    type="password"
+                    id="confirmPassword"
+                    class="auth-input"
+                    placeholder="Re-enter password"
+                >
+
+                <div class="topics-box">
+
+                    <span class="topics-label">
+                        Preferred topics (select up to 5)
+                    </span>
+
+                    <div id="topicsList">
+
+                        <button type="button" class="topic-pill" onclick="toggleTopic(this, 'Technology')">Technology</button>
+                        <button type="button" class="topic-pill" onclick="toggleTopic(this, 'Finance')">Finance</button>
+                        <button type="button" class="topic-pill" onclick="toggleTopic(this, 'Science')">Science</button>
+                        <button type="button" class="topic-pill" onclick="toggleTopic(this, 'Politics')">Politics</button>
+                        <button type="button" class="topic-pill" onclick="toggleTopic(this, 'Culture')">Culture</button>
+                        <button type="button" class="topic-pill" onclick="toggleTopic(this, 'Sport')">Sport</button>
+                        <button type="button" class="topic-pill" onclick="toggleTopic(this, 'Health')">Health</button>
+                        <button type="button" class="topic-pill" onclick="toggleTopic(this, 'Environment')">Environment</button>
+
+                    </div>
+
+                </div>
+
+                <button
+                    type="submit"
+                    class="auth-submit"
+                >
+                    Create Account
+                </button>
+
+            </form>
+
+            <p class="auth-footer">
+                Already have an account?
+                <a
+                    href="#"
+                    class="auth-link-strong"
+                    onclick="switchToSignIn(event)"
+                >
+                    Sign in
+                </a>
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <script src="article.js"></script>
+
+</body>
+
+</html>
