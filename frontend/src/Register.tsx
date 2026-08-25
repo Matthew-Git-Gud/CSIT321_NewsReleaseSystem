@@ -1,13 +1,16 @@
-import { FormEvent, useState } from 'react'
+import { type FormEvent, useState } from 'react'
 import { register } from './services/auth'
 import './Auth.css'
+import ThemeToggle from './ThemeToggle'
 
 type RegisterProps = {
   onSuccess: () => void
   onLogin: () => void
+  theme: 'light' | 'dark'
+  onToggleTheme: () => void
 }
 
-function Register({ onSuccess, onLogin }: RegisterProps) {
+function Register({ onSuccess, onLogin, theme, onToggleTheme }: RegisterProps) {
   const [fullName, setFullName] = useState('')
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
@@ -39,6 +42,10 @@ function Register({ onSuccess, onLogin }: RegisterProps) {
 
   return (
     <main className="auth-page">
+      {/* Keep display preferences available while a guest creates an account. */}
+      <div className="auth-theme-control">
+        <ThemeToggle theme={theme} onToggle={onToggleTheme} />
+      </div>
       <section className="auth-card">
         <a className="brand auth-brand" href="#home">News Release System</a>
 

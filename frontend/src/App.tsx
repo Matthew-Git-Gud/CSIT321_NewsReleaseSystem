@@ -3,7 +3,12 @@ import "./App.css";
 
 import Login from "./Login";
 import Register from "./Register";
+import ThemeToggle from "./ThemeToggle";
 import { getCurrentUser, logout, type User } from "./services/auth";
+
+type Theme = "light" | "dark";
+
+const THEME_STORAGE_KEY = "news-release-theme";
 
 type Article = {
   id: number;
@@ -95,12 +100,28 @@ const categories = [
 function App() {
   const [activeCategory, setActiveCategory] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
+  // Load the visitor's previous choice so the interface stays consistent after refresh.
+  const [theme, setTheme] = useState<Theme>(() =>
+    localStorage.getItem(THEME_STORAGE_KEY) === "dark" ? "dark" : "light",
+  );
 
   // Used for simple hash-based navigation
   const [page, setPage] = useState(window.location.hash || "#home");
 
   // Currently logged-in user
   const [user, setUser] = useState<User | null>(null);
+
+  // Apply the theme to the document root, allowing all pages to share one CSS theme.
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    localStorage.setItem(THEME_STORAGE_KEY, theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme((currentTheme) =>
+      currentTheme === "light" ? "dark" : "light",
+    );
+  };
 
   // Listen for changes to #login, #register, #home, etc.
   useEffect(() => {
@@ -164,6 +185,8 @@ function App() {
           navigate("#home");
         }}
         onRegister={() => navigate("#register")}
+        theme={theme}
+        onToggleTheme={toggleTheme}
       />
     );
   }
@@ -176,6 +199,8 @@ function App() {
       <Register
         onSuccess={() => navigate("#login")}
         onLogin={() => navigate("#login")}
+        theme={theme}
+        onToggleTheme={toggleTheme}
       />
     );
   }
@@ -203,6 +228,7 @@ function App() {
 
         {/* ================= AUTH BUTTONS ================= */}
         <div className="header-actions">
+          <ThemeToggle theme={theme} onToggle={toggleTheme} />
           {user ? (
             <>
               <span className="welcome">Hi, {user.full_name}</span>

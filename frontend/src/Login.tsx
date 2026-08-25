@@ -1,12 +1,16 @@
-import { FormEvent, useState } from 'react'
+import { type FormEvent, useState } from 'react'
 import { login, type User } from './services/auth'
 import './Auth.css'
+import ThemeToggle from './ThemeToggle'
+
 type LoginProps = {
   onSuccess: (user: User) => void
   onRegister: () => void
+  theme: 'light' | 'dark'
+  onToggleTheme: () => void
 }
 
-function Login({ onSuccess, onRegister }: LoginProps) {
+function Login({ onSuccess, onRegister, theme, onToggleTheme }: LoginProps) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -29,6 +33,10 @@ function Login({ onSuccess, onRegister }: LoginProps) {
 
   return (
     <main className="auth-page">
+      {/* The same theme control is available before a guest signs in. */}
+      <div className="auth-theme-control">
+        <ThemeToggle theme={theme} onToggle={onToggleTheme} />
+      </div>
       <section className="auth-card">
         <a className="brand auth-brand" href="#home">News Release System</a>
 

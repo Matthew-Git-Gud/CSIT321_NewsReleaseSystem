@@ -12,6 +12,13 @@
   padding: 40px 20px;
 }
 
+/* Position the mode control without affecting the centered authentication card. */
+.auth-theme-control {
+  position: fixed;
+  right: 24px;
+  top: 24px;
+}
+
 /* Authentication card */
 
 .auth-card {
@@ -166,6 +173,14 @@
   text-decoration: underline;
 }
 
+/* Authentication pages use the same root theme selected on the home page. */
+:root[data-theme="dark"] .auth-page { background: #14221f; }
+:root[data-theme="dark"] .auth-card { background: #223832; border-color: #466158; box-shadow: 0 18px 45px rgba(0, 0, 0, .25); }
+:root[data-theme="dark"] .auth-heading p:last-child, :root[data-theme="dark"] .auth-switch { color: #b8c9c2; }
+:root[data-theme="dark"] .auth-form label { color: #edf5f1; }
+:root[data-theme="dark"] .auth-form input { background: #193029; border-color: #466158; color: #edf5f1; }
+:root[data-theme="dark"] .auth-form input::placeholder { color: #98aaa3; }
+
 /* Mobile */
 
 @media (max-width: 520px) {
@@ -184,5 +199,10 @@
 
   .auth-heading h1 {
     font-size: 2rem;
+  }
+
+  .auth-theme-control {
+    right: 14px;
+    top: 14px;
   }
 }
