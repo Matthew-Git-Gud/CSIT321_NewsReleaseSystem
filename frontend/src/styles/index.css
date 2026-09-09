@@ -1,0 +1,251 @@
+/* =========================================
+   GLOBAL DESIGN SYSTEM
+   ========================================= */
+
+:root {
+  /* Backgrounds */
+  --bg: #ffffff;
+  --bg-soft: #f1f6f1;
+  --surface: #ffffff;
+  --surface-soft: #f4f7f5;
+
+  /* Text */
+  --text: #18342f;
+  --text-secondary: #52645e;
+  --text-muted: #73807a;
+
+  /* Borders */
+  --border: #d9e0dc;
+  --border-light: #e6ebe8;
+
+  /* Brand */
+  --primary: #1e5b4e;
+  --primary-hover: #174b40;
+  --primary-soft: #edf4ef;
+
+  /* Feedback */
+  --success: #22613a;
+  --success-bg: #eaf7ef;
+  --success-border: #b7dfc4;
+
+  --danger: #a33a32;
+  --danger-bg: #fff1f0;
+  --danger-border: #f0c9c5;
+
+  --warning: #9c651c;
+  --warning-bg: #fff2da;
+
+  /* Shape */
+  --radius-sm: 7px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-pill: 999px;
+
+  /* Shadows */
+  --shadow-card:
+    0 10px 30px rgba(25, 52, 45, 0.08);
+
+  --shadow-card-hover:
+    0 14px 30px rgba(25, 52, 45, 0.12);
+
+  /* Layout */
+  --page-width: 1200px;
+
+  color: var(--text);
+
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+/* =========================================
+   DARK THEME
+   ========================================= */
+
+:root[data-theme="dark"] {
+  --bg: #14221f;
+  --bg-soft: #1d302b;
+
+  --surface: #223832;
+  --surface-soft: #1a2d27;
+
+  --text: #edf5f1;
+  --text-secondary: #b8c9c2;
+  --text-muted: #98aaa3;
+
+  --border: #466158;
+  --border-light: #385149;
+
+  --primary: #9ad3bb;
+  --primary-hover: #b4dfcc;
+  --primary-soft: #29443c;
+
+  --success: #d9f4df;
+  --success-bg: #1b4930;
+  --success-border: #3e8157;
+
+  --danger: #ffc7c2;
+  --danger-bg: #492725;
+  --danger-border: #7c4541;
+
+  --warning: #ffd69b;
+  --warning-bg: #493820;
+
+  --shadow-card:
+    0 10px 30px rgba(0, 0, 0, 0.18);
+
+  --shadow-card-hover:
+    0 14px 32px rgba(0, 0, 0, 0.25);
+}
+
+/* =========================================
+   RESET
+   ========================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-width: 320px;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  margin: 0;
+  min-width: 320px;
+
+  transition:
+    background-color 0.2s,
+    color 0.2s;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+/* =========================================
+   TYPOGRAPHY
+   ========================================= */
+
+h1,
+h2,
+h3 {
+  color: var(--text);
+  font-family: Georgia, serif;
+}
+
+.eyebrow {
+  color: var(--primary);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  margin: 0 0 12px;
+  text-transform: uppercase;
+}
+
+/* =========================================
+   SHARED BUTTONS
+   ========================================= */
+
+.primary-button {
+  background: var(--primary);
+  border: 1px solid var(--primary);
+  border-radius: var(--radius-sm);
+  color: #ffffff;
+  cursor: pointer;
+  font-weight: 700;
+  padding: 11px 16px;
+
+  transition:
+    opacity 0.2s,
+    transform 0.2s;
+}
+
+:root[data-theme="dark"] .primary-button {
+  color: #14221f;
+}
+
+.primary-button:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.primary-button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.primary-button:disabled {
+  opacity: 0.6;
+}
+
+.text-button {
+  background: transparent;
+  border: 0;
+  color: var(--primary);
+  font-weight: 700;
+  padding: 8px 0;
+}
+
+.text-button:hover {
+  text-decoration: underline;
+}
+
+/* =========================================
+   FEEDBACK
+   ========================================= */
+
+.form-error {
+  background: var(--danger-bg);
+  border: 1px solid var(--danger-border);
+  border-radius: var(--radius-sm);
+  color: var(--danger);
+  font-size: 0.85rem;
+  line-height: 1.4;
+  margin: 8px 0 0;
+  padding: 10px 12px;
+}
+
+.form-success {
+  background: var(--success-bg);
+  border: 1px solid var(--success-border);
+  border-radius: var(--radius-sm);
+  color: var(--success);
+  margin: 24px 0 0;
+  padding: 10px 12px;
+}
+
+/* =========================================
+   SHARED PAGE WIDTH
+   ========================================= */
+
+.page-container {
+  margin: 0 auto;
+  max-width: var(--page-width);
+  width: calc(100% - 48px);
+}
+
+@media (max-width: 600px) {
+  .page-container {
+    width: calc(100% - 28px);
+  }
+}

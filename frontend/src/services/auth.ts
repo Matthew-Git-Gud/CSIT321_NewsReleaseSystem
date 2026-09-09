@@ -14,6 +14,34 @@ type RegisterData = {
   password: string
 }
 
+export class AuthError extends Error {
+  suspended: boolean;
+  canAppeal: boolean;
+  appealToken: string | null;
+
+  constructor(
+    message: string,
+    options?: {
+      suspended?: boolean;
+      canAppeal?: boolean;
+      appealToken?: string;
+    },
+  ) {
+    super(message);
+
+    this.name = "AuthError";
+
+    this.suspended =
+      options?.suspended ?? false;
+
+    this.canAppeal =
+      options?.canAppeal ?? false;
+
+    this.appealToken =
+      options?.appealToken ?? null;
+  }
+}
+
 async function getResponseData(response: Response) {
   const data = await response.json().catch(() => ({ message: 'Unexpected server response' }))
 
@@ -35,16 +63,44 @@ export async function register(formData: RegisterData) {
   return getResponseData(response)
 }
 
-export async function login(email: string, password: string): Promise<User> {
-  const response = await fetch(`${API_URL}/login`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
-    body: JSON.stringify({ email, password }),
-  })
+export async function login(
+  email: string,
+  password: string,
+): Promise<User> {
+  const response = await fetch(
+    `${API_URL}/login`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
 
-  const data = await getResponseData(response)
-  return data.user
+      body: JSON.stringify({
+        email,
+        password,
+      }),
+    },
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new AuthError(
+      data.message ||
+        "Unable to sign in",
+      {
+        suspended:
+          data.suspended === true,
+        canAppeal:
+          data.canAppeal === true,
+        appealToken:
+          data.appealToken,
+      },
+    );
+  }
+
+  return data.user;
 }
 
 export async function logout() {
@@ -62,10 +118,20 @@ export async function getCurrentUser(): Promise<User | null> {
     credentials: 'include',
   })
 
-  if (response.status === 401) {
-    return null
+  if (
+    response.status === 401 ||
+    response.status === 403
+  ) {
+    return null;
   }
 
   const data = await getResponseData(response)
+  
+  if (!response.ok) {
+    throw new Error(
+      data.message ||
+        "Unable to get current user",
+    );
+  }
   return data.user
 }

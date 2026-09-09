@@ -21,5 +21,8 @@
   "description": "",
   "devDependencies": {
     "concurrently": "^10.0.5"
+  },
+  "dependencies": {
+    "cookie-parser": "^1.4.7"
   }
 }

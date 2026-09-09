@@ -1,75 +1,369 @@
-export type AdminUser = {
-  user_id: number
-  username: string
-  full_name: string
-  role: 'admin'
-}
-
 export type AdminCategory = {
-  category_id: number
-  name: string
-}
+  category_id: number;
+  name: string;
+};
 
 export type AdminArticle = {
-  article_id: number
-  title: string
-  status: 'draft' | 'published' | 'archived' | 'deleted'
-  created_at: string
-  author: string
-  category: string
-}
+  article_id: number;
+  title: string;
+
+  status:
+    | "draft"
+    | "published"
+    | "deleted";
+
+  created_at: string;
+
+  author: string;
+  author_name: string;
+  category: string;
+};
 
 export type DashboardSummary = {
-  totalArticles: number
-  publishedArticles: number
-  draftArticles: number
-  archivedArticles: number
-}
+  totalArticles: number;
+  publishedArticles: number;
+  draftArticles: number;
+  deletedArticles: number;
+};
 
-const AUTH_URL = 'http://localhost:3000/api/auth'
-const ADMIN_URL = 'http://localhost:3000/api/admin'
+export type AdminUser = {
+  user_id: number;
+  username: string;
+  email: string;
+  full_name: string;
+  role: "registered" | "admin";
+  status: "active" | "suspended";
+  created_at: string;
+};
 
-async function getResponseData(response: Response) {
-  const data = await response.json().catch(() => ({ message: 'Unexpected server response' }))
+const API_URL =
+  "http://localhost:3000/api/admin";
 
-  if (!response.ok) {
-    throw new Error(data.message || 'Request failed')
+export async function getAdminUsers(
+  search = "",
+): Promise<AdminUser[]> {
+  const params =
+    new URLSearchParams();
+
+  if (search.trim()) {
+    params.set(
+      "search",
+      search.trim(),
+    );
   }
 
-  return data
+  const query =
+    params.toString();
+
+  const response = await fetch(
+    `http://localhost:3000/api/admin/users${
+      query ? `?${query}` : ""
+    }`,
+    {
+      credentials: "include",
+    },
+  );
+
+  const data =
+    await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.message ||
+        "Unable to load users",
+    );
+  }
+
+  return data.users;
 }
 
-// Admin login uses a separate endpoint so the server checks the user's role before issuing a session.
-export async function adminLogin(email: string, password: string): Promise<AdminUser> {
-  const response = await fetch(`${AUTH_URL}/admin/login`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
-    body: JSON.stringify({ email, password }),
-  })
+export async function updateUserStatus(
+  userId: number,
+  status: "active" | "suspended",
+): Promise<void> {
+  const response = await fetch(
+    `http://localhost:3000/api/admin/users/${userId}/status`,
+    {
+      method: "PUT",
 
-  const data = await getResponseData(response)
-  return data.user
+      headers: {
+        "Content-Type":
+          "application/json",
+      },
+
+      credentials: "include",
+
+      body: JSON.stringify({
+        status,
+      }),
+    },
+  );
+
+  const data =
+    await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.message ||
+        "Unable to update user status",
+    );
+  }
 }
 
-export async function getAdminDashboard(filters: {
-  search?: string
-  status?: string
-  categoryId?: string
-}) {
-  const query = new URLSearchParams()
+async function getResponseData(
+  response: Response,
+) {
+  const data = await response
+    .json()
+    .catch(() => ({
+      message:
+        "Unexpected server response",
+    }));
 
-  if (filters.search) query.set('search', filters.search)
-  if (filters.status) query.set('status', filters.status)
-  if (filters.categoryId) query.set('categoryId', filters.categoryId)
+  if (!response.ok) {
+    throw new Error(
+      data.message ||
+        "Request failed",
+    );
+  }
 
-  const response = await fetch(`${ADMIN_URL}/dashboard?${query.toString()}`, {
-    credentials: 'include',
-  })
-
-  return getResponseData(response) as Promise<{
-    summary: DashboardSummary
-    categories: AdminCategory[]
-    articles: AdminArticle[]
-  }>
+  return data;
 }
+
+export async function getAdminDashboard(
+  filters: {
+    search?: string;
+    status?: string;
+    categoryId?: string;
+  },
+) {
+  const query =
+    new URLSearchParams();
+
+  if (filters.search) {
+    query.set(
+      "search",
+      filters.search,
+    );
+  }
+
+  if (filters.status) {
+    query.set(
+      "status",
+      filters.status,
+    );
+  }
+
+  if (filters.categoryId) {
+    query.set(
+      "categoryId",
+      filters.categoryId,
+    );
+  }
+
+  const response = await fetch(
+    `${API_URL}/dashboard?${query.toString()}`,
+    {
+      credentials: "include",
+    },
+  );
+
+  return getResponseData(
+    response,
+  ) as Promise<{
+    summary: DashboardSummary;
+    categories: AdminCategory[];
+    articles: AdminArticle[];
+  }>;
+}
+
+export async function deleteAdminArticle(
+  articleId: number,
+): Promise<void> {
+  const response = await fetch(
+    `http://localhost:3000/api/admin/articles/${articleId}`,
+    {
+      method: "DELETE",
+      credentials: "include",
+    },
+  );
+
+  const data =
+    await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.message ||
+        "Unable to delete article",
+    );
+  }
+}
+
+export type AdminEditableArticle = {
+  article_id: number;
+  author_id: number;
+  category_id: number;
+  title: string;
+  summary: string;
+  content: string;
+  status:
+    | "draft"
+    | "published"
+    | "deleted";
+  created_at: string;
+  updated_at: string;
+  category: string;
+  author: string;
+  author_name: string;
+};
+
+export type AdminArticleUpdate = {
+  title: string;
+  summary: string;
+  content: string;
+  category_id: number;
+  status:
+    | "draft"
+    | "published";
+};
+
+export async function getAdminArticle(
+  articleId: number,
+): Promise<AdminEditableArticle> {
+  const response = await fetch(
+    `http://localhost:3000/api/admin/articles/${articleId}`,
+    {
+      method: "GET",
+      credentials: "include",
+    },
+  );
+
+  const data =
+    await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.message ||
+        "Unable to load article",
+    );
+  }
+
+  return data.article;
+}
+
+export async function updateAdminArticle(
+  articleId: number,
+  article: AdminArticleUpdate,
+): Promise<AdminEditableArticle> {
+  const response = await fetch(
+    `http://localhost:3000/api/admin/articles/${articleId}`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type":
+          "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(
+        article,
+      ),
+    },
+  );
+
+  const data =
+    await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.message ||
+        "Unable to update article",
+    );
+  }
+
+  return data.article;
+}
+
+export type AdminArticleReport = {
+  report_id: number;
+  article_id: number;
+  reporter_id: number;
+  reason:
+    | "misinformation"
+    | "inappropriate"
+    | "spam"
+    | "harassment"
+    | "other";
+  details: string | null;
+  status:
+    | "pending"
+    | "reviewed"
+    | "dismissed";
+  created_at: string;
+
+  article_title: string;
+  author_id: number;
+
+  reporter_username: string;
+  reporter_name: string;
+
+  author_username: string;
+  author_name: string;
+};
+
+export type ReportReviewStatus =
+  | "reviewed"
+  | "dismissed";
+
+export async function getPendingReports():
+  Promise<AdminArticleReport[]> {
+  const response = await fetch(
+    "http://localhost:3000/api/admin/reports",
+    {
+      method: "GET",
+      credentials: "include",
+    },
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.message ||
+        "Unable to load reports",
+    );
+  }
+
+  return data;
+}
+
+export async function updateReportStatus(
+  reportId: number,
+  status: ReportReviewStatus,
+): Promise<string> {
+  const response = await fetch(
+    `http://localhost:3000/api/admin/reports/${reportId}/status`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type":
+          "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        status,
+      }),
+    },
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.message ||
+        "Unable to update report",
+    );
+  }
+
+  return data.message;
+}
+

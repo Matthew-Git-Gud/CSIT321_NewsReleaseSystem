@@ -1,0 +1,383 @@
+.admin-page {
+  min-height: calc(100vh - 80px);
+  padding: 40px 24px 60px;
+}
+
+.admin-content {
+  margin: 0 auto;
+  max-width: 1180px;
+}
+
+.admin-title-row {
+  align-items: flex-end;
+  display: flex;
+  gap: 20px;
+  justify-content: space-between;
+}
+
+.admin-title-row h1 {
+  font-size: clamp(
+    2rem,
+    5vw,
+    3.4rem
+  );
+  margin: 0;
+}
+
+.admin-welcome {
+  color: #68756f;
+  margin: 10px 0 0;
+}
+
+.system-status {
+  color: #487465;
+  font-size: 0.78rem;
+  margin: 0 0 7px;
+}
+
+.system-status span {
+  color: #37a36a;
+  font-size: 0.7rem;
+}
+.admin-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+/* =========================
+   METRICS
+========================= */
+
+.admin-metrics {
+  display: grid;
+  gap: 14px;
+  grid-template-columns:
+    repeat(
+      4,
+      minmax(0, 1fr)
+    );
+  margin: 24px 0;
+}
+
+.admin-metric {
+  background: #ffffff;
+  border:
+    1px solid #e1e7e4;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 18px;
+}
+
+.admin-metric strong {
+  color: #18342f;
+  font-size: 1.75rem;
+}
+
+.admin-metric span {
+  color: #74807b;
+  font-size: 0.82rem;
+}
+
+.admin-metric.positive strong {
+  color: #24845a;
+}
+
+.admin-metric.warning strong {
+  color: #b76a18;
+}
+
+.admin-metric.neutral strong {
+  color: #64728b;
+}
+
+/* =========================
+   ARTICLE MANAGEMENT
+========================= */
+
+.article-management {
+  background: #ffffff;
+  border:
+    1px solid #e1e7e4;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.article-management-heading {
+  align-items: center;
+  display: flex;
+  gap: 20px;
+  justify-content: space-between;
+  padding: 21px 22px;
+}
+
+.article-management h2 {
+  font-size: 1.35rem;
+  margin: 0;
+}
+
+/* =========================
+   FILTERS
+========================= */
+
+.admin-filters {
+  display: flex;
+  gap: 8px;
+}
+
+.admin-filters input,
+.admin-filters select {
+  background: #ffffff;
+  border:
+    1px solid #d7e0db;
+  border-radius: 7px;
+  color: #355049;
+  font: inherit;
+  font-size: 0.82rem;
+  padding: 9px 10px;
+}
+
+.admin-filters input {
+  min-width: 190px;
+}
+
+/* =========================
+   TABLE
+========================= */
+
+.admin-table-wrap {
+  overflow-x: auto;
+}
+
+.admin-table-wrap table {
+  border-collapse: collapse;
+  min-width: 720px;
+  width: 100%;
+}
+
+.admin-table-wrap th {
+  background: #f4f7f5;
+  color: #617069;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  padding: 11px 14px;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.admin-table-wrap td {
+  border-top:
+    1px solid #edf1ef;
+  color: #52645e;
+  font-size: 0.83rem;
+  padding: 13px 14px;
+}
+
+.admin-table-wrap
+  td:nth-child(2) {
+  color: #18342f;
+  font-weight: 700;
+  max-width: 360px;
+}
+
+/* =========================
+   STATUS BADGES
+========================= */
+
+.status-badge {
+  border-radius: 999px;
+  display: inline-block;
+  font-size: 0.71rem;
+  font-weight: 700;
+  padding: 4px 8px;
+  text-transform: capitalize;
+}
+
+.status-badge.published {
+  background: #e5f6ea;
+  color: #25824e;
+}
+
+.status-badge.draft {
+  background: #fff2da;
+  color: #9c651c;
+}
+
+.status-badge.deleted {
+  background: #eceff1;
+  color: #60707a;
+}
+
+/* =========================
+   MESSAGES
+========================= */
+
+.admin-empty {
+  color: #68756f;
+  margin: 0;
+  padding: 32px 22px;
+  text-align: center;
+}
+
+.admin-message {
+  margin: 0 22px 22px;
+}
+
+/* =========================
+   DARK MODE
+========================= */
+
+:root[data-theme="dark"]
+  .admin-welcome {
+  color: #b8c9c2;
+}
+
+:root[data-theme="dark"]
+  .system-status {
+  color: #9ad3bb;
+}
+
+:root[data-theme="dark"]
+  .admin-metric,
+:root[data-theme="dark"]
+  .article-management {
+  background: #223832;
+  border-color: #466158;
+}
+
+:root[data-theme="dark"]
+  .admin-metric strong,
+:root[data-theme="dark"]
+  .article-management h2,
+:root[data-theme="dark"]
+  .admin-table-wrap
+  td:nth-child(2) {
+  color: #edf5f1;
+}
+
+:root[data-theme="dark"]
+  .admin-metric span,
+:root[data-theme="dark"]
+  .admin-empty,
+:root[data-theme="dark"]
+  .admin-table-wrap td {
+  color: #b8c9c2;
+}
+
+:root[data-theme="dark"]
+  .admin-filters input,
+:root[data-theme="dark"]
+  .admin-filters select {
+  background: #193029;
+  border-color: #466158;
+  color: #edf5f1;
+}
+
+:root[data-theme="dark"]
+  .admin-table-wrap th {
+  background: #1a2d27;
+  color: #b8c9c2;
+}
+
+:root[data-theme="dark"]
+  .admin-table-wrap td {
+  border-color: #385149;
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (
+  max-width: 760px
+) {
+  .admin-page {
+    padding: 24px 18px 40px;
+  }
+
+  .admin-title-row,
+  .article-management-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .admin-metrics {
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(0, 1fr)
+      );
+  }
+
+  .admin-filters {
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  .admin-filters input {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .admin-filters select {
+    flex: 1;
+  }
+}
+
+@media (
+  max-width: 480px
+) {
+  .admin-metrics {
+    grid-template-columns: 1fr;
+  }
+}
+
+.admin-suspend-button,
+.admin-reactivate-button {
+  background: transparent;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 6px 10px;
+}
+
+.admin-suspend-button {
+  border: 1px solid #c96b65;
+  color: #a33a32;
+}
+
+.admin-suspend-button:hover {
+  background: #fff1f0;
+}
+
+.admin-reactivate-button {
+  border: 1px solid #5c9d78;
+  color: #28724b;
+}
+
+.admin-reactivate-button:hover {
+  background: #eaf7ef;
+}
+
+:root[data-theme="dark"]
+  .admin-suspend-button {
+  border-color: #c87973;
+  color: #ffc7c2;
+}
+
+:root[data-theme="dark"]
+  .admin-suspend-button:hover {
+  background: #492725;
+}
+
+:root[data-theme="dark"]
+  .admin-reactivate-button {
+  border-color: #6fa98a;
+  color: #b9e9cb;
+}
+
+:root[data-theme="dark"]
+  .admin-reactivate-button:hover {
+  background: #1b4930;
+}
