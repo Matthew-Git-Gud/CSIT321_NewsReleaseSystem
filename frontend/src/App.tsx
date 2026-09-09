@@ -2,6 +2,9 @@ import { useEffect, useMemo, useState } from "react";
 import "./App.css";
 
 import Login from "./Login";
+import AdminDashboard from "./AdminDashboard";
+import AdminLogin from "./AdminLogin";
+import Preferences from "./Preferences";
 import Register from "./Register";
 import ThemeToggle from "./ThemeToggle";
 import { getCurrentUser, logout, type User } from "./services/auth";
@@ -205,6 +208,46 @@ function App() {
     );
   }
 
+  if (page === "#admin-login") {
+    return (
+      <AdminLogin
+        theme={theme}
+        onToggleTheme={toggleTheme}
+        onHome={() => navigate("#home")}
+        onSuccess={(adminUser) => {
+          setUser(adminUser)
+          navigate("#admin-dashboard")
+        }}
+      />
+    );
+  }
+
+  if (page === "#admin-dashboard") {
+    return (
+      <AdminDashboard
+        user={user}
+        theme={theme}
+        onToggleTheme={toggleTheme}
+        onHome={() => navigate("#home")}
+        onAdminLogin={() => navigate("#admin-login")}
+        onLogout={handleLogout}
+      />
+    );
+  }
+
+  // The page itself handles guests while the backend enforces authenticated access.
+  if (page === "#preferences") {
+    return (
+      <Preferences
+        user={user}
+        theme={theme}
+        onToggleTheme={toggleTheme}
+        onHome={() => navigate("#home")}
+        onLogin={() => navigate("#login")}
+      />
+    );
+  }
+
   // ------------------------------------------
   // HOME PAGE
   // ------------------------------------------
@@ -224,6 +267,8 @@ function App() {
           <a href="#categories">Categories</a>
 
           <a href="#about">About</a>
+
+          <a href="#admin-login">Admin</a>
         </nav>
 
         {/* ================= AUTH BUTTONS ================= */}
@@ -232,6 +277,16 @@ function App() {
           {user ? (
             <>
               <span className="welcome">Hi, {user.full_name}</span>
+
+              <button className="sign-in" type="button" onClick={() => navigate("#preferences")}>
+                Preferences
+              </button>
+
+              {user.role === "admin" && (
+                <button className="sign-in" type="button" onClick={() => navigate("#admin-dashboard")}>
+                  Admin dashboard
+                </button>
+              )}
 
               <button className="sign-in" type="button" onClick={handleLogout}>
                 Sign out

@@ -6,11 +6,33 @@ const createToken = (user) => jwt.sign(
   {
     user_id: user.user_id,
     username: user.username,
+    full_name: user.full_name,
     role: user.role,
   },
   process.env.JWT_SECRET,
   { expiresIn: '1h' },
 )
+
+const sendLoginResponse = (res, user) => {
+  const token = createToken(user)
+
+  res.cookie('token', token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 60 * 60 * 1000,
+  })
+
+  return res.json({
+    message: 'Login successful',
+    user: {
+      user_id: user.user_id,
+      username: user.username,
+      full_name: user.full_name,
+      role: user.role,
+    },
+  })
+}
 
 const register = async (req, res) => {
   try {
@@ -74,24 +96,42 @@ const login = async (req, res) => {
       return res.status(401).json({ message: 'Invalid email or password' })
     }
 
-    const token = createToken(user)
+    return sendLoginResponse(res, user)
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({ message: 'Server error' })
+  }
+}
 
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 1000,
-    })
+const adminLogin = async (req, res) => {
+  try {
+    const { email, password } = req.body
 
-    return res.json({
-      message: 'Login successful',
-      user: {
-        user_id: user.user_id,
-        username: user.username,
-        full_name: user.full_name,
-        role: user.role,
-      },
-    })
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Email and password are required' })
+    }
+
+    const [users] = await pool.execute(
+      'SELECT * FROM users WHERE email = ?',
+      [email],
+    )
+
+    if (users.length === 0 || !(await bcrypt.compare(password, users[0].password_hash))) {
+      return res.status(401).json({ message: 'Invalid email or password' })
+    }
+
+    const user = users[0]
+
+    if (user.status !== 'active') {
+      return res.status(403).json({ message: 'Your account is suspended' })
+    }
+
+    // A valid registered-user account still cannot be used to enter the admin area.
+    if (user.role !== 'admin') {
+      return res.status(403).json({ message: 'This account does not have administrator access' })
+    }
+
+    return sendLoginResponse(res, user)
   } catch (error) {
     console.error(error)
     return res.status(500).json({ message: 'Server error' })
@@ -115,6 +155,7 @@ const getCurrentUser = (req, res) => {
 module.exports = {
   register,
   login,
+  adminLogin,
   logout,
   getCurrentUser,
 }

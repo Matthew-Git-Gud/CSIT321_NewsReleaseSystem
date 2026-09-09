@@ -1,0 +1,31 @@
+/* Standalone layout keeps preferences separate from the home and article pages. */
+.preferences-page { background: #f1f6f1; min-height: 100vh; padding: 24px; }
+.preferences-header { align-items: center; display: flex; justify-content: space-between; margin: 0 auto; max-width: 980px; }
+.preferences-brand { background: none; border: 0; cursor: pointer; padding: 0; }
+.preferences-card { background: #fff; border: 1px solid #e2e7e3; border-radius: 14px; box-shadow: 0 18px 45px rgba(25, 52, 45, .1); margin: 60px auto; max-width: 680px; padding: 42px; }
+.preferences-card h1 { font-size: clamp(2rem, 5vw, 3rem); margin: 0 0 14px; }
+.preferences-copy, .preferences-status { color: #62706b; line-height: 1.55; margin: 0 0 28px; }
+.topic-options { display: flex; flex-wrap: wrap; gap: 12px; }
+.topic-option { background: #fff; border: 1px solid #d9e0dc; border-radius: 100px; color: #355049; padding: 11px 16px; }
+.topic-option:hover, .topic-option.selected { background: #1e5b4e; border-color: #1e5b4e; color: #fff; }
+.preferences-actions { align-items: center; display: flex; flex-wrap: wrap; gap: 16px; margin-top: 30px; }
+.text-button { background: none; border: 0; color: #1e5b4e; font-weight: 700; padding: 8px 0; }
+.text-button:hover { text-decoration: underline; }
+.form-success { background: #eaf7ef; border: 1px solid #b7dfc4; border-radius: 7px; color: #22613a; margin: 24px 0 0; padding: 10px 12px; }
+.preferences-theme-control { position: fixed; right: 24px; top: 24px; }
+.sign-in-required { text-align: center; }
+.sign-in-required .text-button { display: block; margin: 18px auto 0; }
+
+/* Dark-theme variants use App's root attribute and keep selected topics prominent. */
+:root[data-theme="dark"] .preferences-page { background: #14221f; }
+:root[data-theme="dark"] .preferences-card { background: #223832; border-color: #466158; box-shadow: 0 18px 45px rgba(0, 0, 0, .25); }
+:root[data-theme="dark"] .preferences-copy, :root[data-theme="dark"] .preferences-status { color: #b8c9c2; }
+:root[data-theme="dark"] .topic-option { background: #193029; border-color: #466158; color: #edf5f1; }
+:root[data-theme="dark"] .text-button { color: #9ad3bb; }
+:root[data-theme="dark"] .form-success { background: #1b4930; border-color: #3e8157; color: #d9f4df; }
+
+@media (max-width: 520px) {
+  .preferences-page { padding: 14px; }
+  .preferences-card { margin: 54px auto 20px; padding: 30px 22px; }
+  .preferences-theme-control { right: 14px; top: 14px; }
+}
