@@ -92,11 +92,10 @@ function NavBar({
                   key={item.path}
                   to={item.path}
                   end={
-                    item.path === "/"
+                    item.path === "/" ||
+                    item.path === "/admin"
                   }
-                  className={({
-                    isActive,
-                  }) =>
+                  className={({ isActive }) =>
                     isActive
                       ? "navbar-link active"
                       : "navbar-link"

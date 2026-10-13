@@ -602,10 +602,10 @@ function AdminDashboard() {
         ========================= */}
 
         <section
-          className="article-management"
+          className="admin-management"
           aria-labelledby="all-articles-heading"
         >
-          <div className="article-management-heading">
+          <div className="admin-management-heading">
 
             <h2 id="all-articles-heading">
               All articles
@@ -880,11 +880,11 @@ function AdminDashboard() {
         ========================= */}
 
         <section
-          className="article-management report-management"
+          className="admin-management report-management"
           aria-labelledby="reported-articles-heading"
         >
 
-          <div className="article-management-heading">
+          <div className="admin-management-heading">
 
             <div>
               <p className="eyebrow">
@@ -1094,10 +1094,10 @@ function AdminDashboard() {
 ========================= */}
 
         <section
-          className="article-management report-management"
+          className="admin-management report-management"
           aria-labelledby="suspension-appeals-heading"
         >
-          <div className="article-management-heading">
+          <div className="admin-management-heading">
             <div>
               <p className="eyebrow">
                 User moderation

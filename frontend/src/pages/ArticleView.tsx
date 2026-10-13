@@ -12,6 +12,7 @@ import {
 
 import {
   getArticleById,
+  recordArticleView,
   type Article,
 } from "../services/articles";
 
@@ -42,12 +43,29 @@ import {
 
 import { useAuth } from "../context/AuthContext";
 import { ROLES } from "../constants/roles";
+import DOMPurify from "dompurify";
 
 function ArticleView() {
+  const [viewCount, setViewCount] = useState(0);
   const { articleId } = useParams();
   const navigate = useNavigate();
 
   const { user, role } = useAuth();
+
+  // Public article sharing: no authentication or backend request required.
+  const [copyLinkStatus, setCopyLinkStatus] = useState<"idle" | "copied" | "error">("idle");
+
+  const handleCopyArticleLink = async () => {
+    if (!articleId) return;
+
+    const articleUrl = new URL(`/articles/${encodeURIComponent(articleId)}`, window.location.origin).href;
+    try {
+      await navigator.clipboard.writeText(articleUrl);
+      setCopyLinkStatus("copied");
+    } catch {
+      setCopyLinkStatus("error");
+    }
+  };
 
   // =========================
   // RATINGS STATE
@@ -232,10 +250,23 @@ function ArticleView() {
       try {
         setError("");
 
-        const result =
-          await getArticleById(id);
+
+        const result = await getArticleById(id);
 
         setArticle(result);
+        setViewCount(result.view_count ?? 0);
+
+        // View tracking should not prevent the article from loading.
+        try {
+          const updatedCount = await recordArticleView(id);
+          setViewCount(updatedCount);
+        } catch (viewError) {
+          console.error(
+            "Unable to record article view:",
+            viewError
+          );
+        }
+
       } catch (requestError) {
         setError(
           requestError instanceof Error
@@ -870,6 +901,25 @@ function ArticleView() {
               ).toLocaleDateString()}
             </span>
 
+            <span className="article-view-count">
+              👁 {viewCount.toLocaleString()}{" "}
+              {viewCount === 1 ? "view" : "views"}
+            </span>
+
+          </div>
+
+          {/* Available to guests, registered users, and administrators. */}
+          <div className="article-share-actions">
+            <button type="button" onClick={handleCopyArticleLink}>
+              {copyLinkStatus === "copied" ? "✓ Link Copied" : "Copy Article Link"}
+            </button>
+            <span role="status" aria-live="polite">
+              {copyLinkStatus === "error"
+                ? "Unable to copy link. Check clipboard permissions or use HTTPS."
+                : copyLinkStatus === "copied"
+                  ? "Article link copied to clipboard."
+                  : ""}
+            </span>
           </div>
 
           {/* =========================
@@ -1095,19 +1145,12 @@ function ArticleView() {
 
         <div className="article-content">
 
-          {article.content
-            .split("\n")
-            .filter(
-              (paragraph) =>
-                paragraph.trim() !== "",
-            )
-            .map(
-              (paragraph, index) => (
-                <p key={index}>
-                  {paragraph}
-                </p>
-              ),
-            )}
+          <div
+            className="article-rich-content"
+            dangerouslySetInnerHTML={{
+              __html: DOMPurify.sanitize(article.content),
+            }}
+          />
 
         </div>
 
@@ -1129,7 +1172,7 @@ function ArticleView() {
             </p>
 
             <h2 id="credibility-heading">
-              Community credibility
+              Reader Rating
             </h2>
           </div>
         </div>
@@ -1148,11 +1191,10 @@ function ArticleView() {
           <p>
             {ratingCount === 0
               ? "No ratings yet"
-              : `Based on ${ratingCount} ${
-                  ratingCount === 1
-                    ? "rating"
-                    : "ratings"
-                }`}
+              : `Based on ${ratingCount} ${ratingCount === 1
+                ? "rating"
+                : "ratings"
+              }`}
           </p>
         </div>
 

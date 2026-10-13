@@ -119,51 +119,62 @@ function PersonalisedFeed() {
         ) : (
           <div
             className="article-grid"
-            style={{
-              marginTop: "30px",
-            }}
+            
           >
-            {articles.map(
-              (article) => (
-                <article
-                  className="article-card"
-                  key={
-                    article.article_id
-                  }
-                >
-                  <div className="article-body">
-                    <p className="category">
-                      {article.category}
-                    </p>
+            {articles.map((article) => (
+              <article
+                className="article-card feed-card"
+                key={article.article_id}
+              >
+                <div className="article-body">
+                  <p className="category">
+                    {article.category}
+                  </p>
 
-                    <h3>
-                      <Link
-                        to={`/articles/${article.article_id}`}
-                      >
-                        {article.title}
-                      </Link>
-                    </h3>
+                  <h3>
+                    <Link
+                      className="article-title-link"
+                      to={`/articles/${article.article_id}`}
+                    >
+                      {article.title}
+                    </Link>
+                  </h3>
 
-                    <p className="excerpt">
-                      {article.summary}
-                    </p>
+                  <p className="excerpt">
+                    {article.summary}
+                  </p>
 
-                    <div className="article-meta">
-                      <span>
-                        {article.author_name ||
-                          article.author_username}
-                      </span>
+                  <div className="article-meta">
+                    <span>
+                      {article.author_name ||
+                        article.author_username}
+                    </span>
 
-                      <span>
-                        {new Date(
-                          article.created_at,
-                        ).toLocaleDateString()}
-                      </span>
-                    </div>
+                    <span className="meta-separator">
+                      •
+                    </span>
+
+                    <span>
+                      {new Date(
+                        article.created_at,
+                      ).toLocaleDateString("en-SG", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      })}
+                    </span>
                   </div>
-                </article>
-              ),
-            )}
+
+                  <Link
+                    className="read-story-link"
+                    to={`/articles/${article.article_id}`}
+                  >
+                    Read story
+                    <span aria-hidden="true">→</span>
+                  </Link>
+                </div>
+              </article>
+            ))}
           </div>
         )}
       </section>

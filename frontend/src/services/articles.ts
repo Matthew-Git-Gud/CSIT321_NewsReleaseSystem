@@ -45,6 +45,7 @@ export type Article = {
   status: ArticleStatus;
 
   category: string;
+  view_count: number;
 
   created_at: string;
   updated_at: string;
@@ -200,4 +201,33 @@ export async function getPersonalisedFeed(): Promise<Article[]> {
   }
 
   return data.articles;
+}
+
+
+export async function recordArticleView(
+  articleId: number
+): Promise<number> {
+  const sessionKey = `article-view-session-${articleId}`;
+
+  let sessionId = sessionStorage.getItem(sessionKey);
+
+  if (!sessionId) {
+    sessionId = crypto.randomUUID();
+    sessionStorage.setItem(sessionKey, sessionId);
+  }
+
+  const response = await fetch(
+    `${API_URL}/${articleId}/view`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ sessionId }),
+    }
+  );
+
+  const data = await getResponseData(response);
+
+  return data.viewCount;
 }

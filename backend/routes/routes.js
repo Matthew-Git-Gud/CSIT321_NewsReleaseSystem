@@ -13,6 +13,7 @@ const {
   getArticleById,
   getArticleForEdit,
   updateArticle,
+  recordArticleView,
   deleteArticle,
   getPublishedArticles,
   getPersonalisedFeed,
@@ -187,6 +188,11 @@ router.post(
   "/articles/:articleId/comments",
   authenticate,
   createComment,
+);
+
+router.post(
+  "/articles/:id/view",
+  recordArticleView
 );
 
 //comments

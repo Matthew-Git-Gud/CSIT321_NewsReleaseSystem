@@ -336,10 +336,16 @@ const getPendingReports = async (
 // UPDATE REPORT STATUS
 // =========================
 
+// =========================
+// UPDATE REPORT STATUS
+// =========================
+
 const updateReportStatus = async (
   req,
   res,
 ) => {
+  let connection;
+
   try {
     const reportId = Number(
       req.params.reportId,
@@ -348,9 +354,7 @@ const updateReportStatus = async (
     const adminId =
       req.user.user_id;
 
-    const {
-      status,
-    } = req.body;
+    const { status } = req.body;
 
     if (
       !Number.isInteger(reportId) ||
@@ -377,43 +381,56 @@ const updateReportStatus = async (
       });
     }
 
+    connection =
+      await pool.getConnection();
+
+    await connection.beginTransaction();
+
+    // Get report AND associated article
     const [reports] =
-      await pool.query(
+      await connection.query(
         `
         SELECT
           report_id,
+          article_id,
           status
         FROM article_reports
         WHERE report_id = ?
+        FOR UPDATE
         `,
         [reportId],
       );
 
     if (reports.length === 0) {
+      await connection.rollback();
+
       return res.status(404).json({
         message:
           "Report not found",
       });
     }
 
+    const report = reports[0];
+
     if (
-      reports[0].status !== "pending"
+      report.status !== "pending"
     ) {
+      await connection.rollback();
+
       return res.status(400).json({
         message:
           "This report has already been reviewed",
       });
     }
 
-    await pool.query(
+    // Update report
+    await connection.query(
       `
       UPDATE article_reports
-
       SET
         status = ?,
         reviewed_at = CURRENT_TIMESTAMP,
         reviewed_by = ?
-
       WHERE report_id = ?
       `,
       [
@@ -423,13 +440,35 @@ const updateReportStatus = async (
       ],
     );
 
+    // If admin accepts the report,
+    // remove the reported article
+    if (status === "reviewed") {
+      await connection.query(
+        `
+        UPDATE articles
+        SET
+          status = 'deleted',
+          updated_at = CURRENT_TIMESTAMP
+        WHERE article_id = ?
+          AND status != 'deleted'
+        `,
+        [report.article_id],
+      );
+    }
+
+    await connection.commit();
+
     return res.status(200).json({
       message:
         status === "reviewed"
-          ? "Report marked as reviewed"
+          ? "Report accepted and article removed"
           : "Report dismissed",
     });
   } catch (error) {
+    if (connection) {
+      await connection.rollback();
+    }
+
     console.error(
       "Update report status error:",
       error,
@@ -439,6 +478,10 @@ const updateReportStatus = async (
       message:
         "Unable to update report",
     });
+  } finally {
+    if (connection) {
+      connection.release();
+    }
   }
 };
 

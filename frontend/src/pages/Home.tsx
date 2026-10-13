@@ -249,23 +249,23 @@ function Home() {
                 (article) => (
                   <article
                     className="article-card"
-                    key={
-                      article.article_id
-                    }
+                    key={article.article_id}
                   >
                     <div
-                      className="article-image"
+                      className={`article-image article-image-${article.category
+                        .toLowerCase()
+                        .replace(/\s+/g, "-")}`}
                       aria-hidden="true"
                     >
-                      <span>
-                        {article.category}
-                      </span>
+                      <div className="article-image-overlay">
+                        <span className="article-image-category">
+                          {article.category}
+                        </span>
+                      </div>
                     </div>
 
                     <div className="article-body">
-                      <p className="category">
-                        {article.category}
-                      </p>
+                      
 
                       <h3>
                         <button
@@ -285,31 +285,42 @@ function Home() {
                         {article.summary}
                       </p>
 
-                      <div className="article-meta">
-                        <span>
-                          By{" "}
-                          {article.author_name ||
-                            article.author_username}
-                        </span>
+                      <div className="article-card-footer">
+                        <div className="article-meta">
+                          <span>
+                            {article.author_name ||
+                              article.author_username}
+                          </span>
 
-                        <span>
-                          {new Date(
-                            article.created_at,
-                          ).toLocaleDateString()}
-                        </span>
+                          <span aria-hidden="true">•</span>
+
+                          <span>
+                            {new Date(
+                              article.created_at,
+                            ).toLocaleDateString(
+                              "en-SG",
+                              {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric",
+                              },
+                            )}
+                          </span>
+                        </div>
+
+                        <button
+                          type="button"
+                          className="read-article"
+                          onClick={() =>
+                            navigate(
+                              `/articles/${article.article_id}`,
+                            )
+                          }
+                        >
+                          Read story
+                          <span aria-hidden="true">→</span>
+                        </button>
                       </div>
-
-                      <button
-                        type="button"
-                        className="read-article"
-                        onClick={() =>
-                          navigate(
-                            `/articles/${article.article_id}`,
-                          )
-                        }
-                      >
-                        Read article
-                      </button>
                     </div>
                   </article>
                 ),
