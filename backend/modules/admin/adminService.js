@@ -1,24 +1,22 @@
-const pool = require(
-  "../config/database",
-);
+const { outcome } = require('../../shared/outcome');
+const repository = require("./adminRepository");
 
 const getDashboard = async (
-  req,
-  res,
+  command,
 ) => {
   const search =
-    typeof req.query.search === "string"
-      ? req.query.search.trim()
+    typeof command.filters.search === "string"
+      ? command.filters.search.trim()
       : "";
 
   const status =
-    typeof req.query.status === "string"
-      ? req.query.status
+    typeof command.filters.status === "string"
+      ? command.filters.status
       : "";
 
   const categoryId =
     Number.parseInt(
-      req.query.categoryId,
+      command.filters.categoryId,
       10,
     );
 
@@ -28,40 +26,14 @@ const getDashboard = async (
     // =========================
 
     const [summaryRows] =
-      await pool.execute(
-        `SELECT
-          COUNT(*) AS totalArticles,
-
-          COALESCE(
-            SUM(status = 'published'),
-            0
-          ) AS publishedArticles,
-
-          COALESCE(
-            SUM(status = 'draft'),
-            0
-          ) AS draftArticles,
-
-          COALESCE(
-            SUM(status = 'deleted'),
-            0
-          ) AS deletedArticles
-
-        FROM articles`,
-      );
+      await repository.statement1(undefined, undefined);
 
     // =========================
     // CATEGORIES
     // =========================
 
     const [categories] =
-      await pool.execute(
-        `SELECT
-          category_id,
-          name
-        FROM categories
-        ORDER BY name`,
-      );
+      await repository.statement2(undefined, undefined);
 
     // =========================
     // FILTERS
@@ -123,35 +95,9 @@ const getDashboard = async (
     // =========================
 
     const [articles] =
-      await pool.execute(
-        `SELECT
-          a.article_id,
-          a.title,
-          a.status,
-          a.created_at,
-          u.username AS author,
-          u.full_name AS author_name,
-          c.name AS category
+      await repository.statement3(values, undefined, { whereClause });
 
-        FROM articles a
-
-        JOIN users u
-          ON u.user_id =
-             a.author_id
-
-        JOIN categories c
-          ON c.category_id =
-             a.category_id
-
-        ${whereClause}
-
-        ORDER BY a.created_at DESC
-
-        LIMIT 100`,
-        values,
-      );
-
-    return res.status(200).json({
+    return outcome('OK', {
       summary:
         summaryRows[0],
 
@@ -164,17 +110,17 @@ const getDashboard = async (
       error,
     );
 
-    return res.status(500).json({
+    return outcome('INTERNAL_ERROR', {
       message:
         "Unable to load the admin dashboard",
     });
   }
 };
 
-const getUsers = async (req, res) => {
+const getUsers = async (command) => {
   try {
     const search =
-      req.query.search?.trim() || "";
+      command.filters.search?.trim() || "";
 
     let sql = `
       SELECT
@@ -212,12 +158,9 @@ const getUsers = async (req, res) => {
     `;
 
     const [users] =
-      await pool.query(
-        sql,
-        params,
-      );
+      await repository.queryUsers(sql, params);
 
-    return res.status(200).json({
+    return outcome('OK', {
       users,
     });
   } catch (error) {
@@ -226,7 +169,7 @@ const getUsers = async (req, res) => {
       error,
     );
 
-    return res.status(500).json({
+    return outcome('INTERNAL_ERROR', {
       message:
         "Unable to load users",
     });
@@ -235,14 +178,13 @@ const getUsers = async (req, res) => {
 
 
 const updateUserStatus = async (
-  req,
-  res,
+  command,
 ) => {
   try {
     const userId =
-      Number(req.params.userId);
+      Number(command.identifiers.userId);
 
-    const { status } = req.body;
+    const { status } = command.payload;
 
     if (
       ![
@@ -250,36 +192,26 @@ const updateUserStatus = async (
         "suspended",
       ].includes(status)
     ) {
-      return res.status(400).json({
+      return outcome('INVALID', {
         message:
           "Invalid account status",
       });
     }
 
     if (
-      userId === req.user.user_id
+      userId === command.actor.user_id
     ) {
-      return res.status(400).json({
+      return outcome('INVALID', {
         message:
           "You cannot suspend your own account",
       });
     }
 
     const [users] =
-      await pool.query(
-        `
-        SELECT
-          user_id,
-          role,
-          status
-        FROM users
-        WHERE user_id = ?
-        `,
-        [userId],
-      );
+      await repository.statement4([userId], undefined);
 
     if (users.length === 0) {
-      return res.status(404).json({
+      return outcome('NOT_FOUND', {
         message:
           "User not found",
       });
@@ -293,25 +225,18 @@ const updateUserStatus = async (
     if (
       users[0].role === "admin"
     ) {
-      return res.status(403).json({
+      return outcome('FORBIDDEN', {
         message:
           "Administrator accounts cannot be suspended",
       });
     }
 
-    await pool.query(
-      `
-      UPDATE users
-      SET status = ?
-      WHERE user_id = ?
-      `,
-      [
+    await repository.statement5([
         status,
         userId,
-      ],
-    );
+      ], undefined);
 
-    return res.status(200).json({
+    return outcome('OK', {
       message:
         status === "suspended"
           ? "User suspended successfully"
@@ -328,41 +253,31 @@ const updateUserStatus = async (
       error,
     );
 
-    return res.status(500).json({
+    return outcome('INTERNAL_ERROR', {
       message:
         "Unable to update user status",
     });
   }
 };
 
-const deleteArticleAsAdmin = async (req, res) => {
+const deleteArticleAsAdmin = async (command) => {
   try {
     const articleId =
-      Number(req.params.articleId);
+      Number(command.identifiers.articleId);
 
     if (
       !Number.isInteger(articleId) ||
       articleId <= 0
     ) {
-      return res.status(400).json({
+      return outcome('INVALID', {
         message: "Invalid article ID",
       });
     }
 
-    const [articles] = await pool.query(
-      `
-      SELECT
-        article_id,
-        title,
-        status
-      FROM articles
-      WHERE article_id = ?
-      `,
-      [articleId],
-    );
+    const [articles] = await repository.statement6([articleId], undefined);
 
     if (articles.length === 0) {
-      return res.status(404).json({
+      return outcome('NOT_FOUND', {
         message: "Article not found",
       });
     }
@@ -370,22 +285,15 @@ const deleteArticleAsAdmin = async (req, res) => {
     if (
       articles[0].status === "deleted"
     ) {
-      return res.status(400).json({
+      return outcome('INVALID', {
         message:
           "Article is already deleted",
       });
     }
 
-    await pool.query(
-      `
-      UPDATE articles
-      SET status = 'deleted'
-      WHERE article_id = ?
-      `,
-      [articleId],
-    );
+    await repository.statement7([articleId], undefined);
 
-    return res.status(200).json({
+    return outcome('OK', {
       message:
         "Article deleted successfully",
     });
@@ -395,7 +303,7 @@ const deleteArticleAsAdmin = async (req, res) => {
       error,
     );
 
-    return res.status(500).json({
+    return outcome('INTERNAL_ERROR', {
       message:
         "Unable to delete article",
     });
@@ -403,55 +311,31 @@ const deleteArticleAsAdmin = async (req, res) => {
 };
 
 const getArticleForAdminEdit = async (
-  req,
-  res,
+  command,
 ) => {
   try {
     const articleId =
-      Number(req.params.articleId);
+      Number(command.identifiers.articleId);
 
     if (
       !Number.isInteger(articleId) ||
       articleId <= 0
     ) {
-      return res.status(400).json({
+      return outcome('INVALID', {
         message: "Invalid article ID",
       });
     }
 
     const [articles] =
-      await pool.query(
-        `
-        SELECT
-          a.article_id,
-          a.author_id,
-          a.category_id,
-          a.title,
-          a.summary,
-          a.content,
-          a.status,
-          a.created_at,
-          a.updated_at,
-          c.name AS category,
-          u.username AS author,
-          u.full_name AS author_name
-        FROM articles a
-        JOIN categories c
-          ON a.category_id = c.category_id
-        JOIN users u
-          ON a.author_id = u.user_id
-        WHERE a.article_id = ?
-        `,
-        [articleId],
-      );
+      await repository.statement8([articleId], undefined);
 
     if (articles.length === 0) {
-      return res.status(404).json({
+      return outcome('NOT_FOUND', {
         message: "Article not found",
       });
     }
 
-    return res.status(200).json({
+    return outcome('OK', {
       article: articles[0],
     });
   } catch (error) {
@@ -460,7 +344,7 @@ const getArticleForAdminEdit = async (
       error,
     );
 
-    return res.status(500).json({
+    return outcome('INTERNAL_ERROR', {
       message:
         "Unable to load article",
     });
@@ -468,12 +352,11 @@ const getArticleForAdminEdit = async (
 };
 
 const updateArticleAsAdmin = async (
-  req,
-  res,
+  command,
 ) => {
   try {
     const articleId =
-      Number(req.params.articleId);
+      Number(command.identifiers.articleId);
 
     const {
       title,
@@ -481,13 +364,13 @@ const updateArticleAsAdmin = async (
       content,
       category_id,
       status,
-    } = req.body;
+    } = command.payload;
 
     if (
       !Number.isInteger(articleId) ||
       articleId <= 0
     ) {
-      return res.status(400).json({
+      return outcome('INVALID', {
         message: "Invalid article ID",
       });
     }
@@ -498,7 +381,7 @@ const updateArticleAsAdmin = async (
       !content?.trim() ||
       !category_id
     ) {
-      return res.status(400).json({
+      return outcome('INVALID', {
         message:
           "Title, summary, content and category are required",
       });
@@ -512,26 +395,17 @@ const updateArticleAsAdmin = async (
     if (
       !allowedStatuses.includes(status)
     ) {
-      return res.status(400).json({
+      return outcome('INVALID', {
         message:
           "Invalid article status",
       });
     }
 
     const [articles] =
-      await pool.query(
-        `
-        SELECT
-          article_id,
-          status
-        FROM articles
-        WHERE article_id = ?
-        `,
-        [articleId],
-      );
+      await repository.statement9([articleId], undefined);
 
     if (articles.length === 0) {
-      return res.status(404).json({
+      return outcome('NOT_FOUND', {
         message: "Article not found",
       });
     }
@@ -540,81 +414,37 @@ const updateArticleAsAdmin = async (
       articles[0].status ===
       "deleted"
     ) {
-      return res.status(400).json({
+      return outcome('INVALID', {
         message:
           "Deleted articles cannot be edited",
       });
     }
 
     const [categories] =
-      await pool.query(
-        `
-        SELECT category_id
-        FROM categories
-        WHERE category_id = ?
-        `,
-        [category_id],
-      );
+      await repository.statement10([category_id], undefined);
 
     if (
       categories.length === 0
     ) {
-      return res.status(400).json({
+      return outcome('INVALID', {
         message:
           "Invalid category",
       });
     }
 
-    await pool.query(
-      `
-      UPDATE articles
-      SET
-        title = ?,
-        summary = ?,
-        content = ?,
-        category_id = ?,
-        status = ?
-      WHERE article_id = ?
-      `,
-      [
+    await repository.statement11([
         title.trim(),
         summary.trim(),
         content.trim(),
         category_id,
         status,
         articleId,
-      ],
-    );
+      ], undefined);
 
     const [updatedArticles] =
-      await pool.query(
-        `
-        SELECT
-          a.article_id,
-          a.author_id,
-          a.category_id,
-          a.title,
-          a.summary,
-          a.content,
-          a.status,
-          a.created_at,
-          a.updated_at,
-          c.name AS category,
-          u.username AS author,
-          u.full_name AS author_name
-        FROM articles a
-        JOIN categories c
-          ON a.category_id =
-             c.category_id
-        JOIN users u
-          ON a.author_id =
-             u.user_id
-        WHERE a.article_id = ?
-        `,
-        [articleId],
-      );
+      await repository.statement12([articleId], undefined);
 
-    return res.status(200).json({
+    return outcome('OK', {
       message:
         "Article updated successfully",
       article:
@@ -626,7 +456,7 @@ const updateArticleAsAdmin = async (
       error,
     );
 
-    return res.status(500).json({
+    return outcome('INTERNAL_ERROR', {
       message:
         "Unable to update article",
     });

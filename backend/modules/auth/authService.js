@@ -1,6 +1,7 @@
+const { outcome } = require('../../shared/outcome');
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const pool = require("../config/database");
+const repository = require("./authRepository");
 
 // =========================
 // CREATE NORMAL LOGIN TOKEN
@@ -24,10 +25,7 @@ const createToken = (user) =>
 // SEND LOGIN RESPONSE
 // =========================
 
-const sendLoginResponse = (
-  res,
-  user,
-) => {
+const sendLoginResponse = (user) => {
   // Suspended users do NOT
   // receive the normal login cookie.
   if (user.status === "suspended") {
@@ -43,9 +41,7 @@ const sendLoginResponse = (
       },
     );
 
-    return res
-      .status(403)
-      .json({
+    return outcome('FORBIDDEN', {
         message:
           "Your account has been suspended",
         suspended: true,
@@ -61,24 +57,10 @@ const sendLoginResponse = (
   const token =
     createToken(user);
 
-  res.cookie(
-    "token",
-    token,
-    {
-      httpOnly: true,
+  
 
-      secure:
-        process.env.NODE_ENV ===
-        "production",
-
-      sameSite: "lax",
-
-      maxAge:
-        60 * 60 * 1000,
-    },
-  );
-
-  return res.json({
+  return outcome('OK', {
+    __authToken: token,
     message:
       "Login successful",
 
@@ -103,8 +85,7 @@ const sendLoginResponse = (
 // =========================
 
 const register = async (
-  req,
-  res,
+  command,
 ) => {
   try {
     const {
@@ -112,7 +93,7 @@ const register = async (
       username,
       email,
       password,
-    } = req.body;
+    } = command.payload;
 
     if (
       !full_name ||
@@ -120,34 +101,22 @@ const register = async (
       !email ||
       !password
     ) {
-      return res
-        .status(400)
-        .json({
+      return outcome('INVALID', {
           message:
             "All fields are required",
         });
     }
 
     const [existingUsers] =
-      await pool.execute(
-        `
-        SELECT user_id
-        FROM users
-        WHERE username = ?
-           OR email = ?
-        `,
-        [
+      await repository.statement1([
           username,
           email,
-        ],
-      );
+        ], undefined);
 
     if (
       existingUsers.length > 0
     ) {
-      return res
-        .status(409)
-        .json({
+      return outcome('CONFLICT', {
           message:
             "Username or email already exists",
         });
@@ -159,27 +128,14 @@ const register = async (
         10,
       );
 
-    await pool.execute(
-      `
-      INSERT INTO users (
-        username,
-        email,
-        password_hash,
-        full_name
-      )
-      VALUES (?, ?, ?, ?)
-      `,
-      [
+    await repository.statement2([
         username,
         email,
         passwordHash,
         full_name,
-      ],
-    );
+      ], undefined);
 
-    return res
-      .status(201)
-      .json({
+    return outcome('CREATED', {
         message:
           "Registration successful",
       });
@@ -189,9 +145,7 @@ const register = async (
       error,
     );
 
-    return res
-      .status(500)
-      .json({
+    return outcome('INTERNAL_ERROR', {
         message:
           "Server error",
       });
@@ -203,22 +157,19 @@ const register = async (
 // =========================
 
 const login = async (
-  req,
-  res,
+  command,
 ) => {
   try {
     const {
       email,
       password,
-    } = req.body;
+    } = command.payload;
 
     if (
       !email ||
       !password
     ) {
-      return res
-        .status(400)
-        .json({
+      return outcome('INVALID', {
           message:
             "Email and password are required",
         });
@@ -229,20 +180,10 @@ const login = async (
     // =========================
 
     const [users] =
-      await pool.execute(
-        `
-        SELECT *
-        FROM users
-        WHERE email = ?
-        LIMIT 1
-        `,
-        [email],
-      );
+      await repository.statement3([email], undefined);
 
     if (users.length === 0) {
-      return res
-        .status(401)
-        .json({
+      return outcome('UNAUTHENTICATED', {
           message:
             "Invalid email or password",
         });
@@ -261,9 +202,7 @@ const login = async (
       );
 
     if (!passwordMatch) {
-      return res
-        .status(401)
-        .json({
+      return outcome('UNAUTHENTICATED', {
           message:
             "Invalid email or password",
         });
@@ -277,19 +216,14 @@ const login = async (
     // account is active/suspended.
     // =========================
 
-    return sendLoginResponse(
-      res,
-      user,
-    );
+    return sendLoginResponse(user);
   } catch (error) {
     console.error(
       "Login error:",
       error,
     );
 
-    return res
-      .status(500)
-      .json({
+    return outcome('INTERNAL_ERROR', {
         message:
           "Server error",
       });
@@ -301,42 +235,29 @@ const login = async (
 // =========================
 
 const adminLogin = async (
-  req,
-  res,
+  command,
 ) => {
   try {
     const {
       email,
       password,
-    } = req.body;
+    } = command.payload;
 
     if (
       !email ||
       !password
     ) {
-      return res
-        .status(400)
-        .json({
+      return outcome('INVALID', {
           message:
             "Email and password are required",
         });
     }
 
     const [users] =
-      await pool.execute(
-        `
-        SELECT *
-        FROM users
-        WHERE email = ?
-        LIMIT 1
-        `,
-        [email],
-      );
+      await repository.statement4([email], undefined);
 
     if (users.length === 0) {
-      return res
-        .status(401)
-        .json({
+      return outcome('UNAUTHENTICATED', {
           message:
             "Invalid email or password",
         });
@@ -355,9 +276,7 @@ const adminLogin = async (
       );
 
     if (!passwordMatch) {
-      return res
-        .status(401)
-        .json({
+      return outcome('UNAUTHENTICATED', {
           message:
             "Invalid email or password",
         });
@@ -370,9 +289,7 @@ const adminLogin = async (
     if (
       user.role !== "admin"
     ) {
-      return res
-        .status(403)
-        .json({
+      return outcome('FORBIDDEN', {
           message:
             "This account does not have administrator access",
         });
@@ -381,19 +298,14 @@ const adminLogin = async (
     // Handles both:
     // active admin
     // suspended admin
-    return sendLoginResponse(
-      res,
-      user,
-    );
+    return sendLoginResponse(user);
   } catch (error) {
     console.error(
       "Admin login error:",
       error,
     );
 
-    return res
-      .status(500)
-      .json({
+    return outcome('INTERNAL_ERROR', {
         message:
           "Server error",
       });
@@ -405,23 +317,12 @@ const adminLogin = async (
 // =========================
 
 const logout = (
-  req,
-  res,
+  command,
 ) => {
-  res.clearCookie(
-    "token",
-    {
-      httpOnly: true,
+  
 
-      secure:
-        process.env.NODE_ENV ===
-        "production",
-
-      sameSite: "lax",
-    },
-  );
-
-  return res.json({
+  return outcome('OK', {
+    __clearAuthToken: true,
     message:
       "Logout successful",
   });
@@ -432,11 +333,10 @@ const logout = (
 // =========================
 
 const getCurrentUser = (
-  req,
-  res,
+  command,
 ) => {
-  return res.json({
-    user: req.user,
+  return outcome('OK', {
+    user: command.actor,
   });
 };
 

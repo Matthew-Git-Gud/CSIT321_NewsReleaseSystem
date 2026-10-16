@@ -1,6 +1,5 @@
-const pool = require(
-  "../config/database",
-);
+const { outcome } = require('../../shared/outcome');
+const repository = require("./reportRepository");
 
 const ALLOWED_REASONS = [
   "misinformation",
@@ -15,28 +14,27 @@ const ALLOWED_REASONS = [
 // =========================
 
 const createArticleReport = async (
-  req,
-  res,
+  command,
 ) => {
   try {
     const articleId = Number(
-      req.params.articleId,
+      command.identifiers.articleId,
     );
 
     const reporterId =
-      req.user.user_id;
+      command.actor.user_id;
 
     const {
       reason,
       details,
-    } = req.body;
+    } = command.payload;
 
     // Validate article ID
     if (
       !Number.isInteger(articleId) ||
       articleId <= 0
     ) {
-      return res.status(400).json({
+      return outcome('INVALID', {
         message: "Invalid article ID",
       });
     }
@@ -48,7 +46,7 @@ const createArticleReport = async (
         reason,
       )
     ) {
-      return res.status(400).json({
+      return outcome('INVALID', {
         message:
           "Please select a valid report reason",
       });
@@ -62,7 +60,7 @@ const createArticleReport = async (
       cleanDetails &&
       cleanDetails.length > 500
     ) {
-      return res.status(400).json({
+      return outcome('INVALID', {
         message:
           "Report details cannot exceed 500 characters",
       });
@@ -70,20 +68,10 @@ const createArticleReport = async (
 
     // Check article exists and is published
     const [articles] =
-      await pool.query(
-        `
-        SELECT
-          article_id,
-          author_id,
-          status
-        FROM articles
-        WHERE article_id = ?
-        `,
-        [articleId],
-      );
+      await repository.statement1([articleId], undefined);
 
     if (articles.length === 0) {
-      return res.status(404).json({
+      return outcome('NOT_FOUND', {
         message: "Article not found",
       });
     }
@@ -93,7 +81,7 @@ const createArticleReport = async (
     if (
       article.status !== "published"
     ) {
-      return res.status(400).json({
+      return outcome('INVALID', {
         message:
           "Only published articles can be reported",
       });
@@ -105,7 +93,7 @@ const createArticleReport = async (
       article.author_id ===
       reporterId
     ) {
-      return res.status(400).json({
+      return outcome('INVALID', {
         message:
           "You cannot report your own article",
       });
@@ -113,25 +101,15 @@ const createArticleReport = async (
 
     // Prevent duplicate pending reports
     const [existingReports] =
-      await pool.query(
-        `
-        SELECT report_id
-        FROM article_reports
-        WHERE article_id = ?
-          AND reporter_id = ?
-          AND status = 'pending'
-        LIMIT 1
-        `,
-        [
+      await repository.statement2([
           articleId,
           reporterId,
-        ],
-      );
+        ], undefined);
 
     if (
       existingReports.length > 0
     ) {
-      return res.status(409).json({
+      return outcome('CONFLICT', {
         message:
           "You have already reported this article",
       });
@@ -139,25 +117,14 @@ const createArticleReport = async (
 
     // Create report
     const [result] =
-      await pool.query(
-        `
-        INSERT INTO article_reports (
-          article_id,
-          reporter_id,
-          reason,
-          details
-        )
-        VALUES (?, ?, ?, ?)
-        `,
-        [
+      await repository.statement3([
           articleId,
           reporterId,
           reason,
           cleanDetails,
-        ],
-      );
+        ], undefined);
 
-    return res.status(201).json({
+    return outcome('CREATED', {
       message:
         "Article reported successfully",
       report: {
@@ -179,7 +146,7 @@ const createArticleReport = async (
       error,
     );
 
-    return res.status(500).json({
+    return outcome('INTERNAL_ERROR', {
       message:
         "Unable to report article",
     });
@@ -187,40 +154,30 @@ const createArticleReport = async (
 };
 
 const getArticleReportStatus = async (
-  req,
-  res,
+  command,
 ) => {
   try {
     const articleId = Number(
-      req.params.articleId,
+      command.identifiers.articleId,
     );
 
     const userId =
-      req.user.user_id;
+      command.actor.user_id;
 
     if (
       !Number.isInteger(articleId) ||
       articleId <= 0
     ) {
-      return res.status(400).json({
+      return outcome('INVALID', {
         message: "Invalid article ID",
       });
     }
 
     const [articles] =
-      await pool.query(
-        `
-        SELECT
-          article_id,
-          author_id
-        FROM articles
-        WHERE article_id = ?
-        `,
-        [articleId],
-      );
+      await repository.statement4([articleId], undefined);
 
     if (articles.length === 0) {
-      return res.status(404).json({
+      return outcome('NOT_FOUND', {
         message: "Article not found",
       });
     }
@@ -232,29 +189,19 @@ const getArticleReportStatus = async (
     // No need to check reports
     // if this user wrote the article
     if (isAuthor) {
-      return res.status(200).json({
+      return outcome('OK', {
         isAuthor: true,
         hasReported: false,
       });
     }
 
     const [reports] =
-      await pool.query(
-        `
-        SELECT report_id
-        FROM article_reports
-        WHERE article_id = ?
-          AND reporter_id = ?
-          AND status = 'pending'
-        LIMIT 1
-        `,
-        [
+      await repository.statement5([
           articleId,
           userId,
-        ],
-      );
+        ], undefined);
 
-    return res.status(200).json({
+    return outcome('OK', {
       isAuthor: false,
       hasReported:
         reports.length > 0,
@@ -265,7 +212,7 @@ const getArticleReportStatus = async (
       error,
     );
 
-    return res.status(500).json({
+    return outcome('INTERNAL_ERROR', {
       message:
         "Unable to load report status",
     });
@@ -273,49 +220,13 @@ const getArticleReportStatus = async (
 };
 
 const getPendingReports = async (
-  req,
-  res,
+  command,
 ) => {
   try {
     const [reports] =
-      await pool.query(
-        `
-        SELECT
-          ar.report_id,
-          ar.article_id,
-          ar.reporter_id,
-          ar.reason,
-          ar.details,
-          ar.status,
-          ar.created_at,
+      await repository.statement6(undefined, undefined);
 
-          a.title AS article_title,
-          a.author_id,
-
-          reporter.username AS reporter_username,
-          reporter.full_name AS reporter_name,
-
-          author.username AS author_username,
-          author.full_name AS author_name
-
-        FROM article_reports ar
-
-        JOIN articles a
-          ON ar.article_id = a.article_id
-
-        JOIN users reporter
-          ON ar.reporter_id = reporter.user_id
-
-        JOIN users author
-          ON a.author_id = author.user_id
-
-        WHERE ar.status = 'pending'
-
-        ORDER BY ar.created_at DESC
-        `,
-      );
-
-    return res.status(200).json(
+    return outcome('OK', 
       reports,
     );
   } catch (error) {
@@ -324,7 +235,7 @@ const getPendingReports = async (
       error,
     );
 
-    return res.status(500).json({
+    return outcome('INTERNAL_ERROR', {
       message:
         "Unable to load article reports",
     });
@@ -341,26 +252,25 @@ const getPendingReports = async (
 // =========================
 
 const updateReportStatus = async (
-  req,
-  res,
+  command,
 ) => {
   let connection;
 
   try {
     const reportId = Number(
-      req.params.reportId,
+      command.identifiers.reportId,
     );
 
     const adminId =
-      req.user.user_id;
+      command.actor.user_id;
 
-    const { status } = req.body;
+    const { status } = command.payload;
 
     if (
       !Number.isInteger(reportId) ||
       reportId <= 0
     ) {
-      return res.status(400).json({
+      return outcome('INVALID', {
         message: "Invalid report ID",
       });
     }
@@ -375,36 +285,25 @@ const updateReportStatus = async (
         status,
       )
     ) {
-      return res.status(400).json({
+      return outcome('INVALID', {
         message:
           "Invalid report status",
       });
     }
 
     connection =
-      await pool.getConnection();
+      await repository.getConnection();
 
     await connection.beginTransaction();
 
     // Get report AND associated article
     const [reports] =
-      await connection.query(
-        `
-        SELECT
-          report_id,
-          article_id,
-          status
-        FROM article_reports
-        WHERE report_id = ?
-        FOR UPDATE
-        `,
-        [reportId],
-      );
+      await repository.statement7([reportId], connection);
 
     if (reports.length === 0) {
       await connection.rollback();
 
-      return res.status(404).json({
+      return outcome('NOT_FOUND', {
         message:
           "Report not found",
       });
@@ -417,48 +316,28 @@ const updateReportStatus = async (
     ) {
       await connection.rollback();
 
-      return res.status(400).json({
+      return outcome('INVALID', {
         message:
           "This report has already been reviewed",
       });
     }
 
     // Update report
-    await connection.query(
-      `
-      UPDATE article_reports
-      SET
-        status = ?,
-        reviewed_at = CURRENT_TIMESTAMP,
-        reviewed_by = ?
-      WHERE report_id = ?
-      `,
-      [
+    await repository.statement8([
         status,
         adminId,
         reportId,
-      ],
-    );
+      ], connection);
 
     // If admin accepts the report,
     // remove the reported article
     if (status === "reviewed") {
-      await connection.query(
-        `
-        UPDATE articles
-        SET
-          status = 'deleted',
-          updated_at = CURRENT_TIMESTAMP
-        WHERE article_id = ?
-          AND status != 'deleted'
-        `,
-        [report.article_id],
-      );
+      await repository.statement9([report.article_id], connection);
     }
 
     await connection.commit();
 
-    return res.status(200).json({
+    return outcome('OK', {
       message:
         status === "reviewed"
           ? "Report accepted and article removed"
@@ -474,7 +353,7 @@ const updateReportStatus = async (
       error,
     );
 
-    return res.status(500).json({
+    return outcome('INTERNAL_ERROR', {
       message:
         "Unable to update report",
     });

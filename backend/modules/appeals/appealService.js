@@ -1,27 +1,25 @@
+const { outcome } = require('../../shared/outcome');
 const jwt = require("jsonwebtoken");
 
-const pool = require(
-  "../config/database",
-);
+const repository = require("./appealRepository");
 
 // =========================
 // SUBMIT SUSPENSION APPEAL
 // =========================
 
 const submitAppeal = async (
-  req,
-  res,
+  command,
 ) => {
   try {
     const { appealToken, reason } =
-      req.body;
+      command.payload;
 
     // =========================
     // VALIDATION
     // =========================
 
     if (!appealToken) {
-      return res.status(401).json({
+      return outcome('UNAUTHENTICATED', {
         message:
           "Appeal authorization is required",
       });
@@ -32,14 +30,14 @@ const submitAppeal = async (
       typeof reason !== "string" ||
       !reason.trim()
     ) {
-      return res.status(400).json({
+      return outcome('INVALID', {
         message:
           "Please provide a reason for your appeal",
       });
     }
 
     if (reason.trim().length > 2000) {
-      return res.status(400).json({
+      return outcome('INVALID', {
         message:
           "Appeal reason must not exceed 2000 characters",
       });
@@ -57,7 +55,7 @@ const submitAppeal = async (
         process.env.JWT_SECRET,
       );
     } catch {
-      return res.status(401).json({
+      return outcome('UNAUTHENTICATED', {
         message:
           "Your appeal session has expired. Please sign in again.",
       });
@@ -67,7 +65,7 @@ const submitAppeal = async (
       decoded.purpose !==
       "suspension_appeal"
     ) {
-      return res.status(401).json({
+      return outcome('UNAUTHENTICATED', {
         message:
           "Invalid appeal authorization",
       });
@@ -80,20 +78,10 @@ const submitAppeal = async (
     // =========================
 
     const [users] =
-      await pool.query(
-        `
-        SELECT
-          user_id,
-          status
-        FROM users
-        WHERE user_id = ?
-        LIMIT 1
-        `,
-        [userId],
-      );
+      await repository.statement1([userId], undefined);
 
     if (users.length === 0) {
-      return res.status(404).json({
+      return outcome('NOT_FOUND', {
         message:
           "User account not found",
       });
@@ -103,7 +91,7 @@ const submitAppeal = async (
       users[0].status !==
       "suspended"
     ) {
-      return res.status(400).json({
+      return outcome('INVALID', {
         message:
           "This account is not suspended",
       });
@@ -115,19 +103,10 @@ const submitAppeal = async (
     // =========================
 
     const [pendingAppeals] =
-      await pool.query(
-        `
-        SELECT appeal_id
-        FROM suspension_appeals
-        WHERE user_id = ?
-          AND status = 'pending'
-        LIMIT 1
-        `,
-        [userId],
-      );
+      await repository.statement2([userId], undefined);
 
     if (pendingAppeals.length > 0) {
-      return res.status(409).json({
+      return outcome('CONFLICT', {
         message:
           "You already have a pending appeal",
       });
@@ -138,21 +117,12 @@ const submitAppeal = async (
     // =========================
 
     const [result] =
-      await pool.query(
-        `
-        INSERT INTO suspension_appeals (
-          user_id,
-          reason
-        )
-        VALUES (?, ?)
-        `,
-        [
+      await repository.statement3([
           userId,
           reason.trim(),
-        ],
-      );
+        ], undefined);
 
-    return res.status(201).json({
+    return outcome('CREATED', {
       message:
         "Your appeal has been submitted successfully",
       appealId:
@@ -164,7 +134,7 @@ const submitAppeal = async (
       error,
     );
 
-    return res.status(500).json({
+    return outcome('INTERNAL_ERROR', {
       message:
         "Unable to submit appeal",
     });
@@ -177,37 +147,13 @@ const submitAppeal = async (
 // =========================
 
 const getPendingAppeals = async (
-  req,
-  res,
+  command,
 ) => {
   try {
     const [appeals] =
-      await pool.query(
-        `
-        SELECT
-          sa.appeal_id,
-          sa.user_id,
-          sa.reason,
-          sa.status,
-          sa.submitted_at,
+      await repository.statement4(undefined, undefined);
 
-          u.username,
-          u.full_name,
-          u.email
-
-        FROM suspension_appeals sa
-
-        JOIN users u
-          ON u.user_id = sa.user_id
-
-        WHERE sa.status = 'pending'
-
-        ORDER BY
-          sa.submitted_at ASC
-        `,
-      );
-
-    return res.status(200).json(
+    return outcome('OK', 
       appeals,
     );
   } catch (error) {
@@ -216,7 +162,7 @@ const getPendingAppeals = async (
       error,
     );
 
-    return res.status(500).json({
+    return outcome('INTERNAL_ERROR', {
       message:
         "Unable to load appeals",
     });
@@ -229,27 +175,26 @@ const getPendingAppeals = async (
 // =========================
 
 const reviewAppeal = async (
-  req,
-  res,
+  command,
 ) => {
   const connection =
-    await pool.getConnection();
+    await repository.getConnection();
 
   try {
     const appealId = Number(
-      req.params.appealId,
+      command.identifiers.appealId,
     );
 
     const {
       status,
       adminResponse,
-    } = req.body;
+    } = command.payload;
 
     if (
       !Number.isInteger(appealId) ||
       appealId <= 0
     ) {
-      return res.status(400).json({
+      return outcome('INVALID', {
         message:
           "Invalid appeal ID",
       });
@@ -259,7 +204,7 @@ const reviewAppeal = async (
       status !== "approved" &&
       status !== "rejected"
     ) {
-      return res.status(400).json({
+      return outcome('INVALID', {
         message:
           "Status must be approved or rejected",
       });
@@ -273,7 +218,7 @@ const reviewAppeal = async (
         adminResponse.length > 500
       )
     ) {
-      return res.status(400).json({
+      return outcome('INVALID', {
         message:
           "Admin response must not exceed 500 characters",
       });
@@ -283,23 +228,12 @@ const reviewAppeal = async (
 
     // Lock appeal while reviewing
     const [appeals] =
-      await connection.query(
-        `
-        SELECT
-          appeal_id,
-          user_id,
-          status
-        FROM suspension_appeals
-        WHERE appeal_id = ?
-        FOR UPDATE
-        `,
-        [appealId],
-      );
+      await repository.statement5([appealId], connection);
 
     if (appeals.length === 0) {
       await connection.rollback();
 
-      return res.status(404).json({
+      return outcome('NOT_FOUND', {
         message:
           "Appeal not found",
       });
@@ -312,7 +246,7 @@ const reviewAppeal = async (
     ) {
       await connection.rollback();
 
-      return res.status(409).json({
+      return outcome('CONFLICT', {
         message:
           "This appeal has already been reviewed",
       });
@@ -322,25 +256,13 @@ const reviewAppeal = async (
     // UPDATE APPEAL
     // =========================
 
-    await connection.query(
-      `
-      UPDATE suspension_appeals
-      SET
-        status = ?,
-        reviewed_at =
-          CURRENT_TIMESTAMP,
-        reviewed_by = ?,
-        admin_response = ?
-      WHERE appeal_id = ?
-      `,
-      [
+    await repository.statement6([
         status,
-        req.user.user_id,
+        command.actor.user_id,
         adminResponse?.trim() ||
           null,
         appealId,
-      ],
-    );
+      ], connection);
 
     // =========================
     // APPROVED =
@@ -348,19 +270,12 @@ const reviewAppeal = async (
     // =========================
 
     if (status === "approved") {
-      await connection.query(
-        `
-        UPDATE users
-        SET status = 'active'
-        WHERE user_id = ?
-        `,
-        [appeal.user_id],
-      );
+      await repository.statement7([appeal.user_id], connection);
     }
 
     await connection.commit();
 
-    return res.status(200).json({
+    return outcome('OK', {
       message:
         status === "approved"
           ? "Appeal approved and account reactivated"
@@ -374,7 +289,7 @@ const reviewAppeal = async (
       error,
     );
 
-    return res.status(500).json({
+    return outcome('INTERNAL_ERROR', {
       message:
         "Unable to review appeal",
     });

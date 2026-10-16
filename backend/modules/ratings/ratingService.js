@@ -1,42 +1,33 @@
-const pool = require("../config/database");
+const { outcome } = require('../../shared/outcome');
+const repository = require("./ratingRepository");
 
 // =========================
 // GET ARTICLE RATING
 // =========================
 
 const getArticleRating = async (
-  req,
-  res,
+  command,
 ) => {
   try {
     const articleId = Number(
-      req.params.articleId,
+      command.identifiers.articleId,
     );
 
     if (
       !Number.isInteger(articleId) ||
       articleId <= 0
     ) {
-      return res.status(400).json({
+      return outcome('INVALID', {
         message: "Invalid article ID",
       });
     }
 
     // Get article first
     const [articles] =
-      await pool.query(
-        `
-        SELECT
-          article_id,
-          status
-        FROM articles
-        WHERE article_id = ?
-        `,
-        [articleId],
-      );
+      await repository.statement1([articleId], undefined);
 
     if (articles.length === 0) {
-      return res.status(404).json({
+      return outcome('NOT_FOUND', {
         message: "Article not found",
       });
     }
@@ -45,7 +36,7 @@ const getArticleRating = async (
       articles[0].status !==
       "published"
     ) {
-      return res.status(400).json({
+      return outcome('INVALID', {
         message:
           "Ratings are only available for published articles",
       });
@@ -53,39 +44,18 @@ const getArticleRating = async (
 
     // Get average + number of ratings
     const [ratingRows] =
-      await pool.query(
-        `
-        SELECT
-          ROUND(
-            AVG(rating),
-            1
-          ) AS average_rating,
-          COUNT(*) AS rating_count
-        FROM article_ratings
-        WHERE article_id = ?
-        `,
-        [articleId],
-      );
+      await repository.statement2([articleId], undefined);
 
     let userRating = null;
 
     // User may be logged in.
     // If authenticated, return their rating too.
-    if (req.user?.user_id) {
+    if (command.actor?.user_id) {
       const [userRatings] =
-        await pool.query(
-          `
-          SELECT rating
-          FROM article_ratings
-          WHERE article_id = ?
-            AND user_id = ?
-          LIMIT 1
-          `,
-          [
+        await repository.statement3([
             articleId,
-            req.user.user_id,
-          ],
-        );
+            command.actor.user_id,
+          ], undefined);
 
       if (userRatings.length > 0) {
         userRating =
@@ -106,7 +76,7 @@ const getArticleRating = async (
         ratingRows[0].rating_count,
       );
 
-    return res.status(200).json({
+    return outcome('OK', {
       averageRating,
       ratingCount,
       userRating,
@@ -117,7 +87,7 @@ const getArticleRating = async (
       error,
     );
 
-    return res.status(500).json({
+    return outcome('INTERNAL_ERROR', {
       message:
         "Unable to load article rating",
     });
@@ -129,25 +99,24 @@ const getArticleRating = async (
 // =========================
 
 const rateArticle = async (
-  req,
-  res,
+  command,
 ) => {
   try {
     const articleId = Number(
-      req.params.articleId,
+      command.identifiers.articleId,
     );
 
     const userId =
-      req.user.user_id;
+      command.actor.user_id;
 
     const rating =
-      Number(req.body.rating);
+      Number(command.payload.rating);
 
     if (
       !Number.isInteger(articleId) ||
       articleId <= 0
     ) {
-      return res.status(400).json({
+      return outcome('INVALID', {
         message: "Invalid article ID",
       });
     }
@@ -157,27 +126,17 @@ const rateArticle = async (
       rating < 1 ||
       rating > 5
     ) {
-      return res.status(400).json({
+      return outcome('INVALID', {
         message:
           "Rating must be between 1 and 5",
       });
     }
 
     const [articles] =
-      await pool.query(
-        `
-        SELECT
-          article_id,
-          author_id,
-          status
-        FROM articles
-        WHERE article_id = ?
-        `,
-        [articleId],
-      );
+      await repository.statement4([articleId], undefined);
 
     if (articles.length === 0) {
-      return res.status(404).json({
+      return outcome('NOT_FOUND', {
         message: "Article not found",
       });
     }
@@ -189,7 +148,7 @@ const rateArticle = async (
       article.status !==
       "published"
     ) {
-      return res.status(400).json({
+      return outcome('INVALID', {
         message:
           "Only published articles can be rated",
       });
@@ -200,7 +159,7 @@ const rateArticle = async (
       article.author_id ===
       userId
     ) {
-      return res.status(400).json({
+      return outcome('INVALID', {
         message:
           "You cannot rate your own article",
       });
@@ -208,44 +167,17 @@ const rateArticle = async (
 
     // Insert if none exists,
     // update if user already rated it.
-    await pool.query(
-      `
-      INSERT INTO article_ratings (
-        article_id,
-        user_id,
-        rating
-      )
-      VALUES (?, ?, ?)
-
-      ON DUPLICATE KEY UPDATE
-        rating = VALUES(rating),
-        updated_at =
-          CURRENT_TIMESTAMP
-      `,
-      [
+    await repository.statement5([
         articleId,
         userId,
         rating,
-      ],
-    );
+      ], undefined);
 
     // Return latest statistics
     const [ratingRows] =
-      await pool.query(
-        `
-        SELECT
-          ROUND(
-            AVG(rating),
-            1
-          ) AS average_rating,
-          COUNT(*) AS rating_count
-        FROM article_ratings
-        WHERE article_id = ?
-        `,
-        [articleId],
-      );
+      await repository.statement6([articleId], undefined);
 
-    return res.status(200).json({
+    return outcome('OK', {
       message:
         "Rating saved successfully",
 
@@ -272,7 +204,7 @@ const rateArticle = async (
       error,
     );
 
-    return res.status(500).json({
+    return outcome('INTERNAL_ERROR', {
       message:
         "Unable to save rating",
     });
