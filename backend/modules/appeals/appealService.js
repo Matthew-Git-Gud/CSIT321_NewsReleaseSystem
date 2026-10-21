@@ -153,9 +153,13 @@ const getPendingAppeals = async (
     const [appeals] =
       await repository.statement4(undefined, undefined);
 
-    return outcome('OK', 
+    /*
+     * The controller turns outcome.data into a JSON object. Wrap the list
+     * under a key so the browser receives an array at data.appeals.
+     */
+    return outcome('OK', {
       appeals,
-    );
+    });
   } catch (error) {
     console.error(
       "Get pending appeals error:",

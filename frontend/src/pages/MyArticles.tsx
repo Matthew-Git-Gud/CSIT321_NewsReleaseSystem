@@ -84,6 +84,15 @@ function MyArticles() {
     );
   }
 
+  // Page-level counts help the author see the state of their work at a glance.
+  const publishedCount = articles.filter(
+    (article) => article.status === "published",
+  ).length;
+
+  const draftCount = articles.filter(
+    (article) => article.status === "draft",
+  ).length;
+
   return (
     <main className="my-articles-page">
       <div className="section-heading">
@@ -110,6 +119,30 @@ function MyArticles() {
           + Write Article
         </button>
       </div>
+
+      <section
+        className="author-summary"
+        aria-label="Your article summary"
+      >
+        <div>
+          <span>Total stories</span>
+          <strong>{articles.length}</strong>
+        </div>
+
+        <div>
+          <span>Published</span>
+          <strong>{publishedCount}</strong>
+        </div>
+
+        <div>
+          <span>Drafts in progress</span>
+          <strong>{draftCount}</strong>
+        </div>
+
+        <p>
+          Your space to write, refine and share with the community.
+        </p>
+      </section>
 
       {error && (
         <p className="form-error">
@@ -138,8 +171,9 @@ function MyArticles() {
       )}
 
       {articles.length > 0 && (
-        <div className="article-management">
-          <table>
+        <div className="article-management-wrap">
+          <div className="article-management">
+            <table>
             <thead>
               <tr>
                 <th>Title</th>
@@ -207,7 +241,8 @@ function MyArticles() {
                 </tr>
               ))}
             </tbody>
-          </table>
+            </table>
+          </div>
         </div>
       )}
     </main>

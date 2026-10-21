@@ -54,40 +54,63 @@ function PersonalisedFeed() {
 
   if (loading) {
     return (
-      <main className="content">
-        <p>Loading your feed...</p>
+      <main className="feed-page">
+        <section className="page-status page-container">
+          <p>Loading your feed...</p>
+        </section>
       </main>
     );
   }
 
   if (error) {
     return (
-      <main className="content">
-        <p className="form-error">
-          {error}
-        </p>
+      <main className="feed-page">
+        <section className="page-status page-container">
+          <p className="form-error">
+            {error}
+          </p>
+        </section>
       </main>
     );
   }
 
   return (
-    <main>
-      <section className="intro">
-        <p className="eyebrow">
-          Personalised
-        </p>
+    <main className="feed-page">
+      <section className="feed-hero">
+        <div className="page-container feed-hero-content">
+          <div>
+            <p className="eyebrow">
+              Personalised
+            </p>
 
-        <h1>Your Feed</h1>
+            <h1>Your Feed</h1>
 
-        <p className="intro-copy">
-          News based on the categories
-          you selected in your preferences.
-        </p>
+            <p>
+              A focused reading list shaped by the topics you selected.
+            </p>
+
+            <Link className="feed-preferences-link" to="/preferences">
+              Adjust preferences <span aria-hidden="true">→</span>
+            </Link>
+          </div>
+
+          {/* This summary is calculated from the feed already loaded for the user. */}
+          <div className="feed-summary" aria-label="Feed summary">
+            <strong>{articles.length}</strong>
+            <span>
+              {articles.length === 1 ? "story" : "stories"}
+              <br />selected for you
+            </span>
+          </div>
+        </div>
       </section>
 
-      <section className="content">
+      <section className="content page-container feed-content">
         <div className="section-heading">
-          <h2>Recommended for you</h2>
+          <div>
+            <p className="eyebrow">Your reading list</p>
+            <h2>Recommended for you</h2>
+          </div>
 
           <p className="article-count">
             {articles.length}{" "}
@@ -117,19 +140,19 @@ function PersonalisedFeed() {
             </Link>
           </div>
         ) : (
-          <div
-            className="article-grid"
-            
-          >
+          <div className="article-grid feed-grid">
             {articles.map((article) => (
               <article
                 className="article-card feed-card"
                 key={article.article_id}
               >
                 <div className="article-body">
-                  <p className="category">
-                    {article.category}
-                  </p>
+                  <div className="card-topline">
+                    <p className="category">
+                      {article.category}
+                    </p>
+                    <span aria-hidden="true">✦</span>
+                  </div>
 
                   <h3>
                     <Link

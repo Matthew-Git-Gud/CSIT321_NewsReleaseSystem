@@ -94,7 +94,7 @@ function SavedArticles() {
   if (loading) {
     return (
       <main className="saved-page">
-        <section className="content">
+        <section className="content page-container saved-content">
           <p>
             Loading saved articles...
           </p>
@@ -109,13 +109,13 @@ function SavedArticles() {
 
   return (
     <main className="saved-page">
-      <section className="content">
+      <section className="content page-container saved-content">
 
         {/* =========================
             PAGE HEADER
         ========================= */}
 
-        <div className="section-heading">
+        <div className="section-heading saved-header">
           <div>
             <p className="eyebrow">
               Your reading list
@@ -130,12 +130,14 @@ function SavedArticles() {
             </p>
           </div>
 
-          <p>
-            {articles.length}{" "}
-            {articles.length === 1
-              ? "article"
-              : "articles"}
-          </p>
+          <div className="saved-header-count" aria-label="Saved article count">
+            <strong>{articles.length}</strong>
+            <span>
+              {articles.length === 1
+                ? "article saved"
+                : "articles saved"}
+            </span>
+          </div>
         </div>
 
         {/* =========================
@@ -192,9 +194,14 @@ function SavedArticles() {
                     key={article.article_id}
                   >
                     <div className="article-body">
-                      <p className="category">
-                        {article.category}
-                      </p>
+                      <div className="card-topline">
+                        <p className="category">
+                          {article.category}
+                        </p>
+                        <span className="saved-card-mark" aria-label="Saved">
+                          Saved
+                        </span>
+                      </div>
 
                       <h3>
                         {article.title}

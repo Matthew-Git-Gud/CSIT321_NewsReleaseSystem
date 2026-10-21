@@ -333,7 +333,18 @@ export async function getPendingReports():
     );
   }
 
-  return data;
+  /*
+   * The reports endpoint returns a named array. Validate it here so an
+   * unexpected server response becomes a readable dashboard error instead
+   * of crashing the page when it tries to call reports.map(...).
+   */
+  if (!Array.isArray(data.reports)) {
+    throw new Error(
+      "The reports service returned an invalid response.",
+    );
+  }
+
+  return data.reports;
 }
 
 export async function updateReportStatus(

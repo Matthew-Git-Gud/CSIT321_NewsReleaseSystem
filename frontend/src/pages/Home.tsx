@@ -13,6 +13,29 @@ import {
   type ArticlePreview,
 } from "../services/articles";
 
+/*
+ * Every category receives a visual identity, including categories added later
+ * through the database. This avoids blank-looking cards for new topics.
+ */
+const ARTICLE_THEMES = [
+  "article-theme-forest",
+  "article-theme-sky",
+  "article-theme-clay",
+  "article-theme-plum",
+  "article-theme-gold",
+];
+
+function getArticleTheme(category: string) {
+  const characterTotal = Array.from(category).reduce(
+    (total, character) => total + character.charCodeAt(0),
+    0,
+  );
+
+  return ARTICLE_THEMES[
+    characterTotal % ARTICLE_THEMES.length
+  ];
+}
+
 function Home() {
   const navigate = useNavigate();
 
@@ -122,51 +145,79 @@ function Home() {
   };
 
   return (
-    <main>
+    <main className="home-page">
       {/* ================= INTRO ================= */}
       <section
         className="intro"
         id="top"
       >
-        <p className="eyebrow">
-          Community journalism, made accessible
-        </p>
+        <div className="page-container intro-layout">
+          <div className="intro-content">
+            <p className="eyebrow">
+              Community journalism, made accessible
+            </p>
 
-        <h1>
-          Stories that matter, from people who care.
-        </h1>
+            <h1>
+              A clearer view of the stories shaping your community.
+            </h1>
 
-        <p className="intro-copy">
-          Discover fresh perspectives,
-          local updates and thoughtful
-          reporting from our community.
-        </p>
+            <p className="intro-copy">
+              Explore thoughtful reporting, useful local updates and
+              perspectives worth sharing.
+            </p>
 
-        <label
-          className="search"
-          htmlFor="article-search"
-        >
-          <span aria-hidden="true">
-            ⌕
-          </span>
+            <label
+              className="search"
+              htmlFor="article-search"
+            >
+              <span aria-hidden="true">
+                ⌕
+              </span>
 
-          <input
-            id="article-search"
-            value={searchTerm}
-            onChange={(event) =>
-              setSearchTerm(
-                event.target.value,
-              )
-            }
-            placeholder="Search stories"
-            type="search"
-          />
-        </label>
+              <input
+                id="article-search"
+                value={searchTerm}
+                onChange={(event) =>
+                  setSearchTerm(
+                    event.target.value,
+                  )
+                }
+                placeholder="Search by story, topic or keyword"
+                type="search"
+              />
+            </label>
+
+            <div className="hero-details" aria-label="Platform highlights">
+              <span>Discover by topic</span>
+              <span>Save stories for later</span>
+              <span>Join the discussion</span>
+            </div>
+          </div>
+
+          {/* A CSS-built feature panel gives the landing page character without external images. */}
+          <aside className="intro-feature" aria-label="News Release System overview">
+            <div className="feature-topline">
+              <span>Community bulletin</span>
+              <span className="feature-status">Live</span>
+            </div>
+
+            <div className="feature-copy">
+              <p className="feature-number">01</p>
+              <p>Local stories.<br />Useful context.<br />Your perspective.</p>
+            </div>
+
+            <div className="feature-lines" aria-hidden="true">
+              <span />
+              <span />
+              <span />
+            </div>
+          </aside>
+        </div>
       </section>
 
       {/* ================= ARTICLES ================= */}
       <section
-        className="content"
+        className="content page-container"
         id="latest"
         aria-labelledby="latest-heading"
       >
@@ -252,7 +303,7 @@ function Home() {
                     key={article.article_id}
                   >
                     <div
-                      className={`article-image article-image-${article.category
+                      className={`article-image ${getArticleTheme(article.category)} article-image-${article.category
                         .toLowerCase()
                         .replace(/\s+/g, "-")}`}
                       aria-hidden="true"
@@ -366,21 +417,16 @@ function Home() {
         </h2>
 
         <p className="about-copy">
-          News Release System is a
-          community news platform for
-          publishing, discovering and
-          discussing news articles.
-          Registered users can personalise
-          their feed, save articles,
-          participate in discussions,
-          rate article credibility and
-          report inappropriate content.
+          A place for community stories, shared perspectives and useful
+          updates. Personalise your feed, save the stories that matter and
+          help keep the conversation respectful.
         </p>
       </section>
 
       {/* ================= FOOTER ================= */}
-      <footer>
-        News Release System · A community news platform
+      <footer className="site-footer">
+        <span>News Release System</span>
+        <span>Built for informed community conversations.</span>
       </footer>
     </main>
   );

@@ -91,7 +91,17 @@ export async function getPendingAppeals(): Promise<
     );
   }
 
-  return data;
+  /*
+   * Validate the response at the API boundary. This prevents an invalid
+   * response from crashing the dashboard when it renders appeals.map(...).
+   */
+  if (!Array.isArray(data.appeals)) {
+    throw new Error(
+      "The appeals service returned an invalid response.",
+    );
+  }
+
+  return data.appeals;
 }
 
 // =========================

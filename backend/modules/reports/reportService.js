@@ -226,9 +226,14 @@ const getPendingReports = async (
     const [reports] =
       await repository.statement6(undefined, undefined);
 
-    return outcome('OK', 
+    /*
+     * Controllers create the JSON response by spreading outcome.data.
+     * Keep a list inside a named property so it stays an array in JSON,
+     * rather than being converted into an object with numeric keys.
+     */
+    return outcome('OK', {
       reports,
-    );
+    });
   } catch (error) {
     console.error(
       "Get pending reports error:",
