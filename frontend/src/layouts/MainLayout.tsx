@@ -1,6 +1,7 @@
 import { Outlet } from "react-router-dom";
 
 import Navbar from "../components/NavBar";
+import NotificationToast from "../components/NotificationToast";
 
 type Theme = "light" | "dark";
 
@@ -21,6 +22,7 @@ function MainLayout({
       />
 
       <Outlet />
+      <NotificationToast />
     </>
   );
 }

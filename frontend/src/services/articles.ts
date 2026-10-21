@@ -231,3 +231,10 @@ export async function recordArticleView(
 
   return data.viewCount;
 }
+
+// Public recommendations; same shape as the article listing previews.
+export async function getRelatedArticles(articleId: number): Promise<ArticlePreview[]> {
+  const response = await fetch(`${API_URL}/${articleId}/related`);
+  const data = await getResponseData(response);
+  return data.articles;
+}

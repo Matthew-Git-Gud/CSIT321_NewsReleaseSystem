@@ -86,8 +86,18 @@ const recordArticleView = async (rawId, sessionId) => {
   return result;
 };
 
+const getRelatedArticles = async rawId => {
+  const articleId = Number(rawId);
+  if (!Number.isSafeInteger(articleId) || articleId <= 0) {
+    throw new ArticleError(400, 'Invalid article ID');
+  }
+  const source = await repository.findPublishedById(articleId);
+  if (!source) throw new ArticleError(404, 'Published article not found');
+  return { articles: await repository.findRelated(articleId, 5) };
+};
+
 module.exports = {
   ArticleError, createArticle, getMyArticles, deleteArticle, getArticleForEdit,
   updateArticle, getArticleById, getPublishedArticles, getPersonalisedFeed,
-  recordArticleView,
+  recordArticleView, getRelatedArticles,
 };

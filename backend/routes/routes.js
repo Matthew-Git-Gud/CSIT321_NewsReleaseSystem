@@ -17,6 +17,7 @@ const {
   deleteArticle,
   getPublishedArticles,
   getPersonalisedFeed,
+  getRelatedArticles,
 } = require("../modules/articles/articleController");
 
 const {
@@ -96,7 +97,22 @@ const {
   "../middleware/authMiddleware",
 );
 
+const { uploadMedia, getMedia } = require('../modules/media/mediaController');
+const {
+  list: listNotifications,
+  unreadCount: getNotificationUnreadCount,
+  markRead: markNotificationRead,
+  markAllRead: markAllNotificationsRead,
+} = require('../modules/notifications/notificationController')
+
+
+const { shareArticle: shareArticleWithUser, sharedWithMe } = require('../modules/shares/shareController')
+
 const router = express.Router()
+
+router.post('/media', authenticate, uploadMedia);
+router.get('/media/:filename', getMedia);
+
 
 router.post(
   "/articles/:articleId/reports",
@@ -155,6 +171,15 @@ router.get(
   authenticate,
   getArticleForEdit,
 );
+
+router.get(
+  "/articles/:id/related",
+  getRelatedArticles,
+);
+
+// Sharing routes (static path before the dynamic article route)
+router.get('/articles/shared-with-me', authenticate, sharedWithMe);
+router.post('/articles/:id/share', authenticate, shareArticleWithUser);
 
 router.get(
   "/articles/:id",
@@ -340,5 +365,13 @@ router.put(
   requireAdmin,
   reviewAppeal,
 );
+
+// =========================
+// NOTIFICATIONS
+// =========================
+router.get('/notifications', authenticate, listNotifications)
+router.get('/notifications/unread-count', authenticate, getNotificationUnreadCount)
+router.patch('/notifications/read-all', authenticate, markAllNotificationsRead)
+router.patch('/notifications/:id/read', authenticate, markNotificationRead)
 
 module.exports = router

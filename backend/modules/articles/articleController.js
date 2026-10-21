@@ -52,8 +52,13 @@ const recordArticleView = handle(
   'Unable to record article view'
 );
 
+const getRelatedArticles = handle(
+  req => service.getRelatedArticles(req.params.id),
+  'Server error while fetching related articles'
+);
+
 module.exports = {
   createArticle, getMyArticles, deleteArticle, getArticleForEdit,
   updateArticle, getArticleById, getPublishedArticles, getPersonalisedFeed,
-  recordArticleView,
+  recordArticleView, getRelatedArticles,
 };

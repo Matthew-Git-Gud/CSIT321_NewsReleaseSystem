@@ -152,8 +152,29 @@ const recordView = async (articleId, sessionId) => {
   }
 };
 
+// Prioritise matching categories, then fill remaining slots with recent published articles.
+// The current article must be published to expose related recommendations.
+const findRelated = async (articleId, limit = 5) => {
+  const [rows] = await pool.execute(
+    `SELECT a.article_id, a.author_id, a.category_id, a.title, a.summary,
+            a.created_at, a.updated_at, c.name AS category,
+            u.username AS author_username, u.full_name AS author_name
+     FROM articles source
+     JOIN articles a ON a.article_id <> source.article_id
+     JOIN categories c ON a.category_id = c.category_id
+     JOIN users u ON a.author_id = u.user_id
+     WHERE source.article_id = ? AND source.status = 'published'
+       AND a.status = 'published'
+     ORDER BY (a.category_id = source.category_id) DESC,
+              a.created_at DESC, a.article_id DESC
+     LIMIT ${Number(limit)}`,
+    [articleId]
+  );
+  return rows;
+};
+
 module.exports = {
   findCategory, insertArticle, findCreatedArticle, findByAuthor,
   softDelete, findForEdit, update, findPublishedById, findPublished,
-  findPersonalised, recordView,
+  findPersonalised, recordView, findRelated,
 };

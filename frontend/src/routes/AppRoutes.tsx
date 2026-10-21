@@ -19,6 +19,7 @@ import EditArticle from "../pages/EditArticle";
 import SavedArticles from "../pages/SavedArticles";
 import ArticleView from "../pages/ArticleView";
 import Preferences from "../pages/Preferences";
+import SharedArticles from "../pages/SharedArticles";
 
 import AdminDashboard from "../pages/AdminDashboard";
 import UserManagement from "../pages/UserManagement";
@@ -141,6 +142,15 @@ function AppRoutes({
                 ]}
               >
                 <SavedArticles />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/shared-articles"
+            element={
+              <ProtectedRoute allowedRoles={[ROLES.REGISTERED]}>
+                <SharedArticles />
               </ProtectedRoute>
             }
           />

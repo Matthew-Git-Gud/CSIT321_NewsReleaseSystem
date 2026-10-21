@@ -4,6 +4,7 @@ import {
 } from "react-router-dom";
 
 import ThemeToggle from "./ThemeToggle";
+import NotificationBell from "./NotificationBell";
 
 import {
   menuByRole,
@@ -129,6 +130,7 @@ function NavBar({
 
           {user ? (
             <>
+              <NotificationBell />
               <span className="navbar-user">
                 Hi,{" "}
                 {user.full_name ||

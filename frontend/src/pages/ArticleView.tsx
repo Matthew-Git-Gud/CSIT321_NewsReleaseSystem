@@ -12,6 +12,8 @@ import {
 
 import {
   getArticleById,
+  getRelatedArticles,
+  type ArticlePreview,
   recordArticleView,
   type Article,
 } from "../services/articles";
@@ -44,15 +46,21 @@ import {
 import { useAuth } from "../context/AuthContext";
 import { ROLES } from "../constants/roles";
 import DOMPurify from "dompurify";
+import ShareArticleModal from "../components/ShareArticleModal";
+import "../styles/ArticleMedia.css";
+import "../styles/RelatedArticles.css";
 
 function ArticleView() {
   const [viewCount, setViewCount] = useState(0);
+  const [relatedArticles, setRelatedArticles] = useState<ArticlePreview[]>([]);
+  const [relatedLoading, setRelatedLoading] = useState(false);
   const { articleId } = useParams();
   const navigate = useNavigate();
 
   const { user, role } = useAuth();
 
   // Public article sharing: no authentication or backend request required.
+  const [showShareModal, setShowShareModal] = useState(false);
   const [copyLinkStatus, setCopyLinkStatus] = useState<"idle" | "copied" | "error">("idle");
 
   const handleCopyArticleLink = async () => {
@@ -820,6 +828,23 @@ function ArticleView() {
     }
   };
 
+  // Fetch on navigation too, so changing from one article to another refreshes recommendations.
+  useEffect(() => {
+    const id = Number(articleId);
+    if (!Number.isSafeInteger(id) || id <= 0) {
+      setRelatedArticles([]);
+      return;
+    }
+    let active = true;
+    setRelatedArticles([]);
+    setRelatedLoading(true);
+    getRelatedArticles(id)
+      .then(items => { if (active) setRelatedArticles(items); })
+      .catch(() => { if (active) setRelatedArticles([]); })
+      .finally(() => { if (active) setRelatedLoading(false); });
+    return () => { active = false; };
+  }, [articleId]);
+
   // =========================
   // ARTICLE LOADING
   // =========================
@@ -913,6 +938,7 @@ function ArticleView() {
             <button type="button" onClick={handleCopyArticleLink}>
               {copyLinkStatus === "copied" ? "✓ Link Copied" : "Copy Article Link"}
             </button>
+            {user && <button type="button" onClick={() => setShowShareModal(true)}>Share with user</button>}
             <span role="status" aria-live="polite">
               {copyLinkStatus === "error"
                 ? "Unable to copy link. Check clipboard permissions or use HTTPS."
@@ -921,6 +947,8 @@ function ArticleView() {
                   : ""}
             </span>
           </div>
+
+          {showShareModal && article && <ShareArticleModal articleId={article.article_id} onClose={() => setShowShareModal(false)} />}
 
           {/* =========================
               ARTICLE ACTIONS
@@ -1148,7 +1176,7 @@ function ArticleView() {
           <div
             className="article-rich-content"
             dangerouslySetInnerHTML={{
-              __html: DOMPurify.sanitize(article.content),
+              __html: DOMPurify.sanitize(article.content, { ADD_TAGS: ["video"], ADD_ATTR: ["controls", "preload", "src"] }),
             }}
           />
 
@@ -1648,6 +1676,28 @@ function ArticleView() {
 
           )}
 
+      </section>
+
+      <section className="related-articles" aria-labelledby="related-articles-heading">
+        <h2 id="related-articles-heading">Related articles</h2>
+        {relatedLoading && <p>Finding related articles...</p>}
+        {!relatedLoading && relatedArticles.length === 0 && (
+          <p>No related articles available yet.</p>
+        )}
+        {!relatedLoading && relatedArticles.length > 0 && (
+          <div className="related-articles-grid">
+            {relatedArticles.map(item => (
+              <article key={item.article_id} className="related-article-card">
+                <span>{item.category}</span>
+                <h3>
+                  <Link to={`/articles/${item.article_id}`}>{item.title}</Link>
+                </h3>
+                <p>{item.summary}</p>
+                <small>{new Date(item.created_at).toLocaleDateString()}</small>
+              </article>
+            ))}
+          </div>
+        )}
       </section>
 
     </main>
