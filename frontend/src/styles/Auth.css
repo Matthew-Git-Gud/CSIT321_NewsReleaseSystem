@@ -172,3 +172,117 @@
     top: 14px;
   }
 }
+
+/* A calm editorial treatment keeps sign-in focused without looking like a plain form. */
+.auth-page {
+  background:
+    radial-gradient(circle at 16% 18%, rgba(201, 232, 217, 0.85), transparent 27%),
+    radial-gradient(circle at 86% 82%, rgba(253, 221, 179, 0.55), transparent 26%),
+    var(--bg-soft);
+  isolation: isolate;
+  overflow: hidden;
+  position: relative;
+}
+
+.auth-page::before,
+.auth-page::after {
+  border: 1px solid rgba(18, 109, 102, 0.12);
+  border-radius: 50%;
+  content: "";
+  height: 480px;
+  position: absolute;
+  width: 480px;
+  z-index: -1;
+}
+
+.auth-page::before {
+  left: -330px;
+  top: -170px;
+}
+
+.auth-page::after {
+  bottom: -350px;
+  right: -250px;
+}
+
+.auth-card {
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.92);
+  border-color: rgba(213, 226, 220, 0.9);
+  border-radius: 24px;
+  box-shadow: 0 24px 62px rgba(22, 68, 59, 0.14);
+  padding: 46px;
+}
+
+.auth-brand {
+  color: var(--text);
+  font-size: 1.35rem;
+  letter-spacing: -0.04em;
+}
+
+.auth-heading h1 {
+  color: var(--text);
+  letter-spacing: -0.06em;
+}
+
+.auth-form {
+  gap: 12px;
+}
+
+.auth-form input {
+  background: var(--surface-soft);
+  border-color: var(--border);
+  border-radius: 11px;
+  color: var(--text);
+  padding: 14px 15px;
+}
+
+.auth-form input:focus {
+  background: var(--surface);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(18, 109, 102, 0.12);
+}
+
+.auth-submit {
+  border-radius: 11px;
+  margin-top: 16px;
+  padding: 13px 18px;
+}
+
+.auth-back {
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-pill);
+  color: var(--text-secondary);
+  padding: 9px 13px;
+}
+
+.auth-back:hover {
+  background: var(--surface);
+  color: var(--primary);
+  text-decoration: none;
+}
+
+:root[data-theme="dark"] .auth-page {
+  background:
+    radial-gradient(circle at 16% 18%, rgba(46, 112, 89, 0.35), transparent 27%),
+    radial-gradient(circle at 86% 82%, rgba(110, 76, 37, 0.3), transparent 26%),
+    var(--bg);
+}
+
+:root[data-theme="dark"] .auth-card {
+  background: rgba(29, 55, 49, 0.92);
+  border-color: var(--border);
+}
+
+:root[data-theme="dark"] .auth-form input {
+  background: var(--surface-soft);
+  border-color: var(--border);
+  color: var(--text);
+}
+
+:root[data-theme="dark"] .auth-back {
+  background: rgba(29, 55, 49, 0.8);
+  border-color: var(--border);
+  color: var(--text-secondary);
+}

@@ -53,9 +53,20 @@ function NavBar({
           className="navbar-brand"
           to="/"
         >
-          News Release
-          <br />
-          System
+          <span className="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 48 48" focusable="false">
+              <rect x="6" y="5" width="36" height="38" rx="11" />
+              <path d="M16 17h12" />
+              <path d="M16 23h17" />
+              <path d="M16 29h11" />
+              <circle cx="34" cy="16" r="3" />
+            </svg>
+          </span>
+
+          <span>
+            News Release
+            <small>System</small>
+          </span>
         </Link>
 
         <nav

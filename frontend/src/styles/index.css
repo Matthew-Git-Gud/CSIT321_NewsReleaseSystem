@@ -4,24 +4,26 @@
 
 :root {
   /* Backgrounds */
-  --bg: #ffffff;
-  --bg-soft: #f1f6f1;
+  --bg: #f7faf9;
+  --bg-soft: #eaf3ef;
   --surface: #ffffff;
-  --surface-soft: #f4f7f5;
+  --surface-soft: #f0f6f3;
 
   /* Text */
-  --text: #18342f;
-  --text-secondary: #52645e;
-  --text-muted: #73807a;
+  --text: #173a35;
+  --text-secondary: #536a63;
+  --text-muted: #74857f;
 
   /* Borders */
-  --border: #d9e0dc;
-  --border-light: #e6ebe8;
+  --border: #d5e2dc;
+  --border-light: #e5eeea;
 
   /* Brand */
-  --primary: #1e5b4e;
-  --primary-hover: #174b40;
-  --primary-soft: #edf4ef;
+  --primary: #126d66;
+  --primary-hover: #0b5752;
+  --primary-soft: #e2f2ec;
+  --accent: #e8a95f;
+  --accent-soft: #fff0dd;
 
   /* Feedback */
   --success: #22613a;
@@ -36,17 +38,17 @@
   --warning-bg: #fff2da;
 
   /* Shape */
-  --radius-sm: 7px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
   --radius-pill: 999px;
 
   /* Shadows */
   --shadow-card:
-    0 10px 30px rgba(25, 52, 45, 0.08);
+    0 14px 40px rgba(23, 58, 53, 0.09);
 
   --shadow-card-hover:
-    0 14px 30px rgba(25, 52, 45, 0.12);
+    0 18px 44px rgba(23, 58, 53, 0.15);
 
   /* Layout */
   --page-width: 1200px;
@@ -71,11 +73,11 @@
    ========================================= */
 
 :root[data-theme="dark"] {
-  --bg: #14221f;
-  --bg-soft: #1d302b;
+  --bg: #10231f;
+  --bg-soft: #18332d;
 
-  --surface: #223832;
-  --surface-soft: #1a2d27;
+  --surface: #1d3731;
+  --surface-soft: #172c27;
 
   --text: #edf5f1;
   --text-secondary: #b8c9c2;
@@ -84,9 +86,11 @@
   --border: #466158;
   --border-light: #385149;
 
-  --primary: #9ad3bb;
-  --primary-hover: #b4dfcc;
-  --primary-soft: #29443c;
+  --primary: #9de0c6;
+  --primary-hover: #c0efdb;
+  --primary-soft: #294940;
+  --accent: #f0bd79;
+  --accent-soft: #4a3922;
 
   --success: #d9f4df;
   --success-bg: #1b4930;
@@ -129,6 +133,11 @@ body {
     color 0.2s;
 }
 
+::selection {
+  background: var(--primary-soft);
+  color: var(--text);
+}
+
 button,
 input,
 textarea,
@@ -142,6 +151,11 @@ button {
 
 button:disabled {
   cursor: not-allowed;
+}
+
+:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--primary) 45%, transparent);
+  outline-offset: 3px;
 }
 
 /* =========================================
@@ -175,7 +189,8 @@ h3 {
   color: #ffffff;
   cursor: pointer;
   font-weight: 700;
-  padding: 11px 16px;
+  box-shadow: 0 8px 18px rgba(18, 109, 102, 0.18);
+  padding: 11px 17px;
 
   transition:
     opacity 0.2s,
@@ -187,7 +202,10 @@ h3 {
 }
 
 .primary-button:hover:not(:disabled) {
-  opacity: 0.9;
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
+  opacity: 1;
+  transform: translateY(-1px);
 }
 
 .primary-button:active:not(:disabled) {
