@@ -5,7 +5,7 @@ const {
   adminLogin,
   logout,
   getCurrentUser,
-} = require('../controllers/authController')
+} = require('../modules/auth/authController')
 const authenticate = require('../middleware/authMiddleware')
 
 const router = express.Router()

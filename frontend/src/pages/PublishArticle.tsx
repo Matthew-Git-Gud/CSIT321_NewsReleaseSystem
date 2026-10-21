@@ -53,14 +53,13 @@ function PublishArticle() {
     <main className="publish-page">
       <section className="publish-header">
         <p className="eyebrow">
-          News Release System
+          Write a story
         </p>
 
-        <h1>Publish Article</h1>
+        <h1>Publish an article</h1>
 
         <p>
-          Create a story and share it
-          with the community.
+          Create a story and share it with the community.
         </p>
       </section>
 

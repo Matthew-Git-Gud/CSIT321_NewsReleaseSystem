@@ -5,7 +5,7 @@ const {
   login,
   logout,
   getCurrentUser,
-} = require('../controllers/authController')
+} = require('../modules/auth/authController')
 
 const {
   createArticle,
@@ -13,14 +13,15 @@ const {
   getArticleById,
   getArticleForEdit,
   updateArticle,
+  recordArticleView,
   deleteArticle,
   getPublishedArticles,
   getPersonalisedFeed,
-} = require("../controllers/articleController");
+} = require("../modules/articles/articleController");
 
 const {
   getCategories,
-} = require('../controllers/categoryController')
+} = require('../modules/categories/categoryController')
 
 const {
   getComments,
@@ -28,7 +29,7 @@ const {
   updateComment,
   deleteComment,
 } = require(
-  "../controllers/commentController",
+  "../modules/comments/commentController",
 );
 
 const {
@@ -37,7 +38,7 @@ const {
   saveArticle,
   unsaveArticle,
 } = require(
-  "../controllers/savedArticleController",
+  "../modules/saved-articles/savedArticleController",
 );
 const requireAdmin = require(
   "../middleware/adminMiddleware",
@@ -51,7 +52,7 @@ const {
   getArticleForAdminEdit,
   updateArticleAsAdmin,
 } = require(
-  "../controllers/adminController",
+  "../modules/admin/adminController",
 );
 
 const {
@@ -61,7 +62,7 @@ const {
   getPreferences,
   savePreferences,
 } = require(
-  "../controllers/preferencesController",
+  "../modules/preferences/preferencesController",
 );
 
 const {
@@ -70,14 +71,14 @@ const {
   getPendingReports,
   updateReportStatus,
 } = require(
-  "../controllers/reportController",
+  "../modules/reports/reportController",
 );
 
 const {
   getArticleRating,
   rateArticle,
 } = require(
-  "../controllers/ratingController",
+  "../modules/ratings/ratingController",
 );
 
 const {
@@ -85,7 +86,7 @@ const {
   getPendingAppeals,
   reviewAppeal,
 } = require(
-  "../controllers/appealController",
+  "../modules/appeals/appealController",
 );
 
 const {
@@ -187,6 +188,11 @@ router.post(
   "/articles/:articleId/comments",
   authenticate,
   createComment,
+);
+
+router.post(
+  "/articles/:id/view",
+  recordArticleView
 );
 
 //comments

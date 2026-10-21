@@ -172,29 +172,37 @@ function MyArticles() {
                   <td>
                     {new Date(
                       article.updated_at,
-                    ).toLocaleDateString()}
+                    ).toLocaleDateString("en-SG", {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                    })}
                   </td>
 
                   <td>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        navigate(
-                          `/articles/${article.article_id}/edit`,
-                        )
-                      }
-                    >
-                      Edit
-                    </button>
+                    <div className="management-actions">
+                      <button
+                        type="button"
+                        className="edit-action"
+                        onClick={() =>
+                          navigate(
+                            `/articles/${article.article_id}/edit`,
+                          )
+                        }
+                      >
+                        Edit
+                      </button>
 
-                    <button
-                      type="button"
-                      onClick={() =>
-                        handleDelete(article.article_id)
-                      }
-                    >
-                      Delete
-                    </button>
+                      <button
+                        type="button"
+                        className="delete-action"
+                        onClick={() =>
+                          handleDelete(article.article_id)
+                        }
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

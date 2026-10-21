@@ -188,28 +188,9 @@ function SavedArticles() {
 
                 return (
                   <article
-                    className="article-card"
-                    key={
-                      article.article_id
-                    }
+                    className="article-card saved-card"
+                    key={article.article_id}
                   >
-                    {/* =========================
-                        ARTICLE IMAGE / CATEGORY
-                    ========================= */}
-
-                    <div
-                      className="article-image"
-                      aria-hidden="true"
-                    >
-                      <span>
-                        {article.category}
-                      </span>
-                    </div>
-
-                    {/* =========================
-                        ARTICLE CONTENT
-                    ========================= */}
-
                     <div className="article-body">
                       <p className="category">
                         {article.category}
@@ -223,67 +204,67 @@ function SavedArticles() {
                         {article.summary}
                       </p>
 
-                      {/* =========================
-                          ARTICLE META
-                      ========================= */}
-
                       <div className="article-meta">
                         <span>
-                          By{" "}
                           {article.author_name ||
                             article.author_username ||
                             "Unknown author"}
                         </span>
 
+                        <span className="meta-separator">
+                          •
+                        </span>
+
                         <span>
                           {new Date(
                             article.created_at,
-                          ).toLocaleDateString()}
+                          ).toLocaleDateString("en-SG", {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                          })}
                         </span>
                       </div>
-
-                      {/* =========================
-                          SAVED DATE
-                      ========================= */}
 
                       {article.saved_at && (
                         <p className="saved-date">
                           Saved{" "}
                           {new Date(
                             article.saved_at,
-                          ).toLocaleDateString()}
+                          ).toLocaleDateString("en-SG", {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                          })}
                         </p>
                       )}
-
-                      {/* =========================
-                          ACTIONS
-                      ========================= */}
 
                       <div className="saved-article-actions">
                         <button
                           type="button"
+                          className="read-saved-button"
                           onClick={() =>
                             navigate(
                               `/articles/${article.article_id}`,
                             )
                           }
-                          disabled={
-                            isRemoving
-                          }
+                          disabled={isRemoving}
                         >
-                          Read article
+                          Read story
+                          <span aria-hidden="true">
+                            →
+                          </span>
                         </button>
 
                         <button
                           type="button"
+                          className="remove-saved-button"
                           onClick={() =>
                             handleRemove(
                               article.article_id,
                             )
                           }
-                          disabled={
-                            isRemoving
-                          }
+                          disabled={isRemoving}
                         >
                           {isRemoving
                             ? "Removing..."

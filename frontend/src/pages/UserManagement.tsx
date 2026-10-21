@@ -12,32 +12,22 @@ import {
 import "../styles/AdminDashboard.css";
 
 function UserManagement() {
-  const [
-    users,
-    setUsers,
-  ] = useState<AdminUser[]>([]);
+  const [users, setUsers] =
+    useState<AdminUser[]>([]);
 
-  const [
-    search,
-    setSearch,
-  ] = useState("");
+  const [search, setSearch] =
+    useState("");
 
-  const [
-    loading,
-    setLoading,
-  ] = useState(true);
+  const [loading, setLoading] =
+    useState(true);
 
-  const [
-    error,
-    setError,
-  ] = useState("");
+  const [error, setError] =
+    useState("");
 
   const [
     updatingUserId,
     setUpdatingUserId,
-  ] = useState<number | null>(
-    null,
-  );
+  ] = useState<number | null>(null);
 
   useEffect(() => {
     const delay =
@@ -48,19 +38,12 @@ function UserManagement() {
             setError("");
 
             const loadedUsers =
-              await getAdminUsers(
-                search,
-              );
+              await getAdminUsers(search);
 
-            setUsers(
-              loadedUsers,
-            );
-          } catch (
-            requestError
-          ) {
+            setUsers(loadedUsers);
+          } catch (requestError) {
             setError(
-              requestError instanceof
-                Error
+              requestError instanceof Error
                 ? requestError.message
                 : "Unable to load users",
             );
@@ -72,78 +55,71 @@ function UserManagement() {
       );
 
     return () =>
-      window.clearTimeout(
-        delay,
-      );
+      window.clearTimeout(delay);
   }, [search]);
 
-  const handleStatusChange =
-    async (
-      user: AdminUser,
-    ) => {
-      const newStatus =
-        user.status === "active"
-          ? "suspended"
-          : "active";
+  const handleStatusChange = async (
+    user: AdminUser,
+  ) => {
+    const newStatus =
+      user.status === "active"
+        ? "suspended"
+        : "active";
 
-      const action =
-        newStatus === "suspended"
-          ? "suspend"
-          : "reactivate";
+    const action =
+      newStatus === "suspended"
+        ? "suspend"
+        : "reactivate";
 
-      const confirmed =
-        window.confirm(
-          `Are you sure you want to ${action} ${user.username}?`,
-        );
+    const confirmed =
+      window.confirm(
+        `Are you sure you want to ${action} ${user.username}?`,
+      );
 
-      if (!confirmed) {
-        return;
-      }
+    if (!confirmed) {
+      return;
+    }
 
-      try {
-        setUpdatingUserId(
-          user.user_id,
-        );
+    try {
+      setUpdatingUserId(
+        user.user_id,
+      );
 
-        setError("");
+      setError("");
 
-        await updateUserStatus(
-          user.user_id,
-          newStatus,
-        );
+      await updateUserStatus(
+        user.user_id,
+        newStatus,
+      );
 
-        setUsers(
-          (currentUsers) =>
-            currentUsers.map(
-              (currentUser) =>
-                currentUser.user_id ===
-                user.user_id
-                  ? {
-                      ...currentUser,
-                      status:
-                        newStatus,
-                    }
-                  : currentUser,
-            ),
-        );
-      } catch (
-        requestError
-      ) {
-        setError(
-          requestError instanceof Error
-            ? requestError.message
-            : "Unable to update user",
-        );
-      } finally {
-        setUpdatingUserId(
-          null,
-        );
-      }
-    };
+      setUsers((currentUsers) =>
+        currentUsers.map(
+          (currentUser) =>
+            currentUser.user_id ===
+            user.user_id
+              ? {
+                  ...currentUser,
+                  status: newStatus,
+                }
+              : currentUser,
+        ),
+      );
+    } catch (requestError) {
+      setError(
+        requestError instanceof Error
+          ? requestError.message
+          : "Unable to update user",
+      );
+    } finally {
+      setUpdatingUserId(null);
+    }
+  };
 
   return (
     <main className="admin-page">
       <section className="admin-content">
+
+        {/* PAGE HEADER */}
 
         <div className="admin-title-row">
           <div>
@@ -156,15 +132,17 @@ function UserManagement() {
             </h1>
 
             <p className="admin-welcome">
-              Manage registered
-              user accounts.
+              Manage registered user
+              accounts.
             </p>
           </div>
         </div>
 
-        <section className="article-management">
+        {/* USER MANAGEMENT */}
 
-          <div className="article-management-heading">
+        <section className="admin-management">
+
+          <div className="admin-management-heading">
             <div>
               <h2>
                 Users
@@ -182,12 +160,9 @@ function UserManagement() {
               <input
                 type="search"
                 value={search}
-                onChange={(
-                  event,
-                ) =>
+                onChange={(event) =>
                   setSearch(
-                    event.target
-                      .value,
+                    event.target.value,
                   )
                 }
                 placeholder="Search users"
@@ -196,11 +171,15 @@ function UserManagement() {
             </div>
           </div>
 
+          {/* ERROR */}
+
           {error && (
             <p className="form-error admin-message">
               {error}
             </p>
           )}
+
+          {/* TABLE */}
 
           {loading ? (
             <p className="admin-empty">
@@ -211,150 +190,118 @@ function UserManagement() {
               <table>
                 <thead>
                   <tr>
-                    <th>
-                      ID
-                    </th>
-
-                    <th>
-                      User
-                    </th>
-
-                    <th>
-                      Email
-                    </th>
-
-                    <th>
-                      Role
-                    </th>
-
-                    <th>
-                      Joined
-                    </th>
-
-                    <th>
-                      Status
-                    </th>
-
-                    <th>
-                      Action
-                    </th>
+                    <th>ID</th>
+                    <th>User</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Joined</th>
+                    <th>Status</th>
+                    <th>Action</th>
                   </tr>
                 </thead>
 
                 <tbody>
-                  {users.length >
-                  0 ? (
-                    users.map(
-                      (user) => (
-                        <tr
-                          key={
-                            user.user_id
-                          }
-                        >
-                          <td>
+                  {users.length > 0 ? (
+                    users.map((user) => (
+                      <tr
+                        key={
+                          user.user_id
+                        }
+                      >
+                        <td>
+                          {user.user_id}
+                        </td>
+
+                        <td>
+                          <strong>
+                            {user.full_name}
+                          </strong>
+
+                          <br />
+
+                          <span>
+                            @{user.username}
+                          </span>
+                        </td>
+
+                        <td>
+                          {user.email}
+                        </td>
+
+                        <td>
+                          {user.role}
+                        </td>
+
+                        <td>
+                          {new Date(
+                            user.created_at,
+                          ).toLocaleDateString(
+                            "en-SG",
                             {
-                              user.user_id
-                            }
-                          </td>
+                              day: "numeric",
+                              month: "short",
+                              year: "numeric",
+                            },
+                          )}
+                        </td>
 
-                          <td>
-                            <strong>
-                              {
-                                user.full_name
-                              }
-                            </strong>
+                        <td>
+                          <span
+                            className={`status-badge ${
+                              user.status ===
+                              "active"
+                                ? "published"
+                                : "deleted"
+                            }`}
+                          >
+                            {user.status}
+                          </span>
+                        </td>
 
-                            <br />
-
+                        <td>
+                          {user.role ===
+                          "admin" ? (
                             <span>
-                              @
-                              {
-                                user.username
-                              }
+                              —
                             </span>
-                          </td>
-
-                          <td>
-                            {
-                              user.email
-                            }
-                          </td>
-
-                          <td>
-                            {
-                              user.role
-                            }
-                          </td>
-
-                          <td>
-                            {new Date(
-                              user.created_at,
-                            ).toLocaleDateString()}
-                          </td>
-
-                          <td>
-                            <span
-                              className={`status-badge ${
+                          ) : (
+                            <button
+                              type="button"
+                              className={
                                 user.status ===
                                 "active"
-                                  ? "published"
-                                  : "deleted"
-                              }`}
-                            >
-                              {
-                                user.status
+                                  ? "admin-suspend-button"
+                                  : "admin-reactivate-button"
                               }
-                            </span>
-                          </td>
-
-                          <td>
-                            {user.role ===
-                            "admin" ? (
-                              <span>
-                                —
-                              </span>
-                            ) : (
-                              <button
-                                type="button"
-                                className={
-                                  user.status ===
-                                  "active"
-                                    ? "admin-suspend-button"
-                                    : "admin-reactivate-button"
-                                }
-                                disabled={
-                                  updatingUserId ===
-                                  user.user_id
-                                }
-                                onClick={() =>
-                                  handleStatusChange(
-                                    user,
-                                  )
-                                }
-                              >
-                                {updatingUserId ===
+                              disabled={
+                                updatingUserId ===
                                 user.user_id
-                                  ? "Updating..."
-                                  : user.status ===
-                                      "active"
-                                    ? "Suspend"
-                                    : "Reactivate"}
-                              </button>
-                            )}
-                          </td>
-                        </tr>
-                      ),
-                    )
+                              }
+                              onClick={() =>
+                                handleStatusChange(
+                                  user,
+                                )
+                              }
+                            >
+                              {updatingUserId ===
+                              user.user_id
+                                ? "Updating..."
+                                : user.status ===
+                                    "active"
+                                  ? "Suspend"
+                                  : "Reactivate"}
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    ))
                   ) : (
                     <tr>
                       <td
-                        colSpan={
-                          7
-                        }
+                        colSpan={7}
                         className="admin-empty"
                       >
-                        No users
-                        found.
+                        No users found.
                       </td>
                     </tr>
                   )}

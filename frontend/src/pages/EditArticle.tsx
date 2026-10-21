@@ -114,43 +114,43 @@ function EditArticle() {
   }
 
   return (
-    <main className="edit-article-page">
-      <section>
-        <p className="eyebrow">
-          Your stories
-        </p>
+  <main className="editor-page">
+    <section className="editor-header">
+      <p className="eyebrow">
+        Your stories
+      </p>
 
-        <h1>Edit Article</h1>
+      <h1>Edit Article</h1>
 
-        <p>
-          Update your story or change its
-          publication status.
-        </p>
-      </section>
+      <p>
+        Update your story or change its
+        publication status.
+      </p>
+    </section>
 
-      {error && (
-        <p className="form-error">
-          {error}
-        </p>
-      )}
+    {error && (
+      <p className="form-error">
+        {error}
+      </p>
+    )}
 
-      <ArticleForm
-        initialValues={{
-          title: article.title,
-          summary: article.summary,
-          content: article.content,
-          category_id: article.category_id,
+    <ArticleForm
+      initialValues={{
+        title: article.title,
+        summary: article.summary,
+        content: article.content,
+        category_id: article.category_id,
 
-          status:
-            article.status === "published"
-              ? "published"
-              : "draft",
-        }}
-        onSubmit={handleSubmit}
-        loading={saving}
-      />
-    </main>
-  );
+        status:
+          article.status === "published"
+            ? "published"
+            : "draft",
+      }}
+      onSubmit={handleSubmit}
+      loading={saving}
+    />
+  </main>
+);
 }
 
 export default EditArticle;

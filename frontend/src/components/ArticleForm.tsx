@@ -14,6 +14,8 @@ import type {
   CreateArticleStatus,
 } from "../services/articles";
 
+import RichTextEditor from "./RichTextEditor";
+
 type ArticleFormProps = {
   initialValues?: ArticleFormData;
 
@@ -147,9 +149,15 @@ function ArticleForm({
           required
         />
 
-        <small>
-          {summary.length}/500
-        </small>
+        <div className="field-helper">
+          <span>
+            Keep the summary concise and informative.
+          </span>
+
+          <small>
+            {summary.length}/500
+          </small>
+        </div>
       </div>
 
       <div className="form-group">
@@ -202,16 +210,9 @@ function ArticleForm({
           Article Content
         </label>
 
-        <textarea
-          id="article-content"
+        <RichTextEditor
           value={content}
-          onChange={(event) =>
-            setContent(
-              event.target.value,
-            )
-          }
-          placeholder="Write your article..."
-          required
+          onChange={setContent}
         />
       </div>
 

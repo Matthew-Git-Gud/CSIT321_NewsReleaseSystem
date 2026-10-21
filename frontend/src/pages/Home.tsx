@@ -13,29 +13,6 @@ import {
   type ArticlePreview,
 } from "../services/articles";
 
-/*
- * Categories are supplied by the database, so this small deterministic mapper
- * gives every article a visual identity without requiring an image upload.
- */
-const articleThemes = [
-  "article-theme-forest",
-  "article-theme-ocean",
-  "article-theme-sunrise",
-  "article-theme-violet",
-  "article-theme-terracotta",
-];
-
-function getArticleTheme(category: string) {
-  const categoryValue = Array.from(category).reduce(
-    (total, character) => total + character.charCodeAt(0),
-    0,
-  );
-
-  return articleThemes[
-    categoryValue % articleThemes.length
-  ];
-}
-
 function Home() {
   const navigate = useNavigate();
 
@@ -145,75 +122,49 @@ function Home() {
   };
 
   return (
-    <main className="home-page">
+    <main>
+      {/* ================= INTRO ================= */}
       <section
         className="intro"
         id="top"
       >
-        <div className="page-container intro-layout">
-          <div className="intro-copy-column">
-            <p className="eyebrow">
-              Community journalism, made accessible
-            </p>
+        <p className="eyebrow">
+          Community journalism, made accessible
+        </p>
 
-            <h1>
-              Stories that help your community move forward.
-            </h1>
+        <h1>
+          Stories that matter, from people who care.
+        </h1>
 
-            <p className="intro-copy">
-              Discover thoughtful reporting, local updates and fresh
-              perspectives — all in one trusted space.
-            </p>
+        <p className="intro-copy">
+          Discover fresh perspectives,
+          local updates and thoughtful
+          reporting from our community.
+        </p>
 
-            <label
-              className="search"
-              htmlFor="article-search"
-            >
-              <span aria-hidden="true">
-                ⌕
-              </span>
+        <label
+          className="search"
+          htmlFor="article-search"
+        >
+          <span aria-hidden="true">
+            ⌕
+          </span>
 
-              <input
-                id="article-search"
-                value={searchTerm}
-                onChange={(event) =>
-                  setSearchTerm(
-                    event.target.value,
-                  )
-                }
-                placeholder="Search stories, people or topics"
-                type="search"
-              />
-            </label>
-
-            <div className="hero-signals" aria-label="Platform highlights">
-              <span>Topic-led discovery</span>
-              <span>Community discussion</span>
-              <span>Responsible moderation</span>
-            </div>
-          </div>
-
-          <aside className="hero-feature" aria-label="News platform preview">
-            <div className="hero-feature-topline">
-              <span>Featured today</span>
-              <span className="hero-feature-dot" aria-hidden="true" />
-            </div>
-
-            <div className="hero-feature-visual" aria-hidden="true">
-              <span className="hero-orbit hero-orbit-one" />
-              <span className="hero-orbit hero-orbit-two" />
-              <span className="hero-sun" />
-              <span className="hero-hill hero-hill-back" />
-              <span className="hero-hill hero-hill-front" />
-            </div>
-
-            <p className="hero-feature-category">Community focus</p>
-            <h2>One platform for stories worth sharing.</h2>
-            <p className="hero-feature-meta">Discover • Discuss • Save for later</p>
-          </aside>
-        </div>
+          <input
+            id="article-search"
+            value={searchTerm}
+            onChange={(event) =>
+              setSearchTerm(
+                event.target.value,
+              )
+            }
+            placeholder="Search stories"
+            type="search"
+          />
+        </label>
       </section>
 
+      {/* ================= ARTICLES ================= */}
       <section
         className="content"
         id="latest"
@@ -241,35 +192,33 @@ function Home() {
           )}
         </div>
 
-        <div className="filters-row">
-          <p className="filter-label">Explore by topic</p>
-
-          <div
-            className="category-list"
-            id="categories"
-            aria-label="Filter articles by category"
-          >
-            {categories.map((category) => (
-              <button
-                className={
-                  category === activeCategory
-                    ? "selected"
-                    : ""
-                }
-                key={category}
-                onClick={() =>
-                  setActiveCategory(
-                    category,
-                  )
-                }
-                type="button"
-              >
-                {category}
-              </button>
-            ))}
-          </div>
+        {/* ================= CATEGORY FILTER ================= */}
+        <div
+          className="category-list"
+          id="categories"
+          aria-label="Filter articles by category"
+        >
+          {categories.map((category) => (
+            <button
+              className={
+                category === activeCategory
+                  ? "selected"
+                  : ""
+              }
+              key={category}
+              onClick={() =>
+                setActiveCategory(
+                  category,
+                )
+              }
+              type="button"
+            >
+              {category}
+            </button>
+          ))}
         </div>
 
+        {/* ================= LOADING ================= */}
         {loading && (
           <div className="empty-state">
             <p>
@@ -278,6 +227,7 @@ function Home() {
           </div>
         )}
 
+        {/* ================= ERROR ================= */}
         {!loading && error && (
           <div className="empty-state">
             <h3>
@@ -290,6 +240,7 @@ function Home() {
           </div>
         )}
 
+        {/* ================= ARTICLE GRID ================= */}
         {!loading &&
           !error &&
           filteredArticles.length > 0 && (
@@ -298,25 +249,23 @@ function Home() {
                 (article) => (
                   <article
                     className="article-card"
-                    key={
-                      article.article_id
-                    }
+                    key={article.article_id}
                   >
                     <div
-                      className={`article-image ${getArticleTheme(article.category)}`}
+                      className={`article-image article-image-${article.category
+                        .toLowerCase()
+                        .replace(/\s+/g, "-")}`}
                       aria-hidden="true"
                     >
-                      <span>
-                        {article.category}
-                      </span>
-
-                      <small>Community report</small>
+                      <div className="article-image-overlay">
+                        <span className="article-image-category">
+                          {article.category}
+                        </span>
+                      </div>
                     </div>
 
                     <div className="article-body">
-                      <p className="category">
-                        {article.category}
-                      </p>
+                      
 
                       <h3>
                         <button
@@ -336,32 +285,42 @@ function Home() {
                         {article.summary}
                       </p>
 
-                      <div className="article-meta">
-                        <span>
-                          By{" "}
-                          {article.author_name ||
-                            article.author_username}
-                        </span>
+                      <div className="article-card-footer">
+                        <div className="article-meta">
+                          <span>
+                            {article.author_name ||
+                              article.author_username}
+                          </span>
 
-                        <span>
-                          {new Date(
-                            article.created_at,
-                          ).toLocaleDateString()}
-                        </span>
+                          <span aria-hidden="true">•</span>
+
+                          <span>
+                            {new Date(
+                              article.created_at,
+                            ).toLocaleDateString(
+                              "en-SG",
+                              {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric",
+                              },
+                            )}
+                          </span>
+                        </div>
+
+                        <button
+                          type="button"
+                          className="read-article"
+                          onClick={() =>
+                            navigate(
+                              `/articles/${article.article_id}`,
+                            )
+                          }
+                        >
+                          Read story
+                          <span aria-hidden="true">→</span>
+                        </button>
                       </div>
-
-                      <button
-                        type="button"
-                        className="read-article"
-                        onClick={() =>
-                          navigate(
-                            `/articles/${article.article_id}`,
-                          )
-                        }
-                      >
-                        Read story
-                        <span aria-hidden="true">→</span>
-                      </button>
                     </div>
                   </article>
                 ),
@@ -369,6 +328,7 @@ function Home() {
             </div>
           )}
 
+        {/* ================= EMPTY STATE ================= */}
         {!loading &&
           !error &&
           filteredArticles.length === 0 && (
@@ -402,14 +362,19 @@ function Home() {
         </p>
 
         <h2>
-          News Release System
+          About News Release System
         </h2>
 
         <p className="about-copy">
-          Discover community stories, share
-          your own and join the conversation.
-          Personalise your feed, save favourites
-          and help keep the platform respectful.
+          News Release System is a
+          community news platform for
+          publishing, discovering and
+          discussing news articles.
+          Registered users can personalise
+          their feed, save articles,
+          participate in discussions,
+          rate article credibility and
+          report inappropriate content.
         </p>
       </section>
 
