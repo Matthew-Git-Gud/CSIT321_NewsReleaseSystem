@@ -374,4 +374,17 @@ router.get('/notifications/unread-count', authenticate, getNotificationUnreadCou
 router.patch('/notifications/read-all', authenticate, markAllNotificationsRead)
 router.patch('/notifications/:id/read', authenticate, markNotificationRead)
 
+// =========================
+// FRIENDS
+// =========================
+const friends = require('../modules/friends/friendController');
+router.get('/users/search', authenticate, friends.searchUsers);
+router.get('/friends', authenticate, friends.listFriends);
+router.get('/friends/requests', authenticate, friends.listRequests);
+router.post('/friends/requests', authenticate, friends.sendRequest);
+router.patch('/friends/requests/:id/accept', authenticate, friends.acceptRequest);
+router.patch('/friends/requests/:id/reject', authenticate, friends.rejectRequest);
+router.delete('/friends/requests/:id', authenticate, friends.cancelRequest);
+router.delete('/friends/:id', authenticate, friends.removeFriend);
+
 module.exports = router

@@ -24,7 +24,7 @@ import SharedArticles from "../pages/SharedArticles";
 import AdminDashboard from "../pages/AdminDashboard";
 import UserManagement from "../pages/UserManagement";
 import AdminEditArticle from "../pages/AdminEditArticle";
-
+import Friends from "../pages/Friends";
 import { ROLES } from "../constants/roles";
 
 type Theme =
@@ -145,7 +145,8 @@ function AppRoutes({
               </ProtectedRoute>
             }
           />
-
+          <Route path="/friends" element={<ProtectedRoute allowedRoles={[ROLES.REGISTERED]}><Friends /></ProtectedRoute>} />
+          
           <Route
             path="/shared-articles"
             element={
