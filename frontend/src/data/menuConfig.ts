@@ -8,6 +8,10 @@ export type MenuItem = {
 export const menuByRole: Record<Role, MenuItem[]> = {
   [ROLES.GUEST]: [
     {
+      label: "Discover",
+      path: "/discover",
+    },
+    {
       label: "Latest",
       path: "/#latest",
     },
@@ -22,6 +26,10 @@ export const menuByRole: Record<Role, MenuItem[]> = {
   ],
 
   [ROLES.REGISTERED]: [
+    {
+      label: "Discover",
+      path: "/discover",
+    },
     {
       label: "Latest",
       path: "/#latest",
@@ -47,10 +55,6 @@ export const menuByRole: Record<Role, MenuItem[]> = {
       path: "/shared-articles",
     },
     {
-      label: "Friends",
-      path: "/friends",
-    },
-    {
       label: "Saved",
       path: "/saved",
     },
@@ -65,6 +69,10 @@ export const menuByRole: Record<Role, MenuItem[]> = {
   ],
 
   [ROLES.ADMIN]: [
+    {
+      label: "Discover",
+      path: "/discover",
+    },
     {
       label: "Dashboard",
       path: "/admin",

@@ -1,3 +1,4 @@
+import AiChatWidget from "../components/AiChatWidget";
 import { Outlet } from "react-router-dom";
 
 import Navbar from "../components/NavBar";
@@ -23,6 +24,7 @@ function MainLayout({
 
       <Outlet />
       <NotificationToast />
+      <AiChatWidget />
     </>
   );
 }

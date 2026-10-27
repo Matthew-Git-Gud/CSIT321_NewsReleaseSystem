@@ -9,6 +9,7 @@ import MainLayout from "../layouts/MainLayout";
 import ProtectedRoute from "../components/ProtectedRoute";
 
 import Home from "../pages/Home";
+import NewsDiscover from "../pages/NewsDiscover";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
 
@@ -68,6 +69,11 @@ function AppRoutes({
           <Route
             path="/"
             element={<Home />}
+          />
+
+          <Route
+            path="/discover"
+            element={<NewsDiscover />}
           />
 
           <Route
@@ -145,7 +151,7 @@ function AppRoutes({
               </ProtectedRoute>
             }
           />
-          <Route path="/friends" element={<ProtectedRoute allowedRoles={[ROLES.REGISTERED]}><Friends /></ProtectedRoute>} />
+          <Route path="/friends" element={<Friends />} />
           
           <Route
             path="/shared-articles"

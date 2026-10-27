@@ -1,0 +1,9 @@
+.ai-summary-panel { margin: 1.5rem 0; padding: 1.25rem 1.5rem; border: 1px solid var(--border-color, #cbd5e1); border-radius: 12px; background: var(--card-bg, transparent); }
+.ai-summary-heading { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+.ai-summary-heading h2 { margin: 0; font-size: 1.15rem; }
+.ai-summary-heading button { border: 0; background: transparent; color: inherit; text-decoration: underline; cursor: pointer; }
+.ai-summary-text { white-space: pre-wrap; line-height: 1.65; }
+.ai-summary-action { padding: .65rem 1rem; border: 1px solid currentColor; border-radius: 8px; background: transparent; color: inherit; cursor: pointer; }
+.ai-summary-action:disabled { opacity: .6; cursor: wait; }
+.ai-summary-error { color: #c2410c; }
+.ai-summary-panel small { display: block; margin-top: .75rem; opacity: .75; }

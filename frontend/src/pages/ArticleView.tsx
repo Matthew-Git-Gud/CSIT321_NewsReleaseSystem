@@ -47,6 +47,7 @@ import { useAuth } from "../context/AuthContext";
 import { ROLES } from "../constants/roles";
 import DOMPurify from "dompurify";
 import ShareArticleModal from "../components/ShareArticleModal";
+import AiSummaryPanel from "../components/AiSummaryPanel";
 import "../styles/ArticleMedia.css";
 import "../styles/RelatedArticles.css";
 
@@ -1166,6 +1167,15 @@ function ArticleView() {
             )}
 
         </header>
+
+        {/* =========================
+            AI ARTICLE SUMMARY
+        ========================= */}
+        <AiSummaryPanel
+          key={article.article_id}
+          articleId={article.article_id}
+          canGenerate={Boolean(user)}
+        />
 
         {/* =========================
             ARTICLE CONTENT

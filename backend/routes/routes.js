@@ -108,11 +108,12 @@ const {
 
 const { shareArticle: shareArticleWithUser, sharedWithMe } = require('../modules/shares/shareController')
 
+const { summarizeArticle: summarizeArticleWithAi, getArticleSummary: getArticleAiSummary, } = require('../modules/ai/aiController');
+
 const router = express.Router()
 
 router.post('/media', authenticate, uploadMedia);
 router.get('/media/:filename', getMedia);
-
 
 router.post(
   "/articles/:articleId/reports",
@@ -180,6 +181,9 @@ router.get(
 // Sharing routes (static path before the dynamic article route)
 router.get('/articles/shared-with-me', authenticate, sharedWithMe);
 router.post('/articles/:id/share', authenticate, shareArticleWithUser);
+
+router.get('/articles/:id/summary', getArticleAiSummary);
+router.post('/articles/:id/summarize', authenticate, summarizeArticleWithAi);
 
 router.get(
   "/articles/:id",
@@ -386,5 +390,11 @@ router.patch('/friends/requests/:id/accept', authenticate, friends.acceptRequest
 router.patch('/friends/requests/:id/reject', authenticate, friends.rejectRequest);
 router.delete('/friends/requests/:id', authenticate, friends.cancelRequest);
 router.delete('/friends/:id', authenticate, friends.removeFriend);
+
+// Public external news discovery (cached headlines and search)
+const { listExternalNews } = require('../modules/newsAggregation/newsController');
+router.get('/external-news', listExternalNews);
+
+router.use('/chat', require('../modules/chatbot/chatRoutes'));
 
 module.exports = router
