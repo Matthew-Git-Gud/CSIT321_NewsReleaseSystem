@@ -72,13 +72,19 @@ export default function AiChatWidget(){
 
  return <div className="ai-chat-anchor">
   {open&&<section className="ai-chat-panel" aria-label="News AI assistant">
-   <header className="ai-chat-header"><strong>News AI Assistant</strong><div><button onClick={newChat} title="New chat">＋</button><button onClick={()=>setOpen(false)} title="Close">×</button></div></header>
-   <div className="ai-chat-context">{context.type==='article'?`Discussing article #${context.articleId}`:'General news discovery'}</div>
+   <header className="ai-chat-header">
+    <div className="ai-chat-brand">
+     <span className="ai-chat-avatar" aria-hidden="true">✦</span>
+     <div><strong>News assistant</strong><small>Explore the story behind the headline</small></div>
+    </div>
+    <div className="ai-chat-header-actions"><button type="button" onClick={newChat} title="New chat" aria-label="Start a new chat">＋</button><button type="button" onClick={()=>setOpen(false)} title="Close" aria-label="Close assistant">×</button></div>
+   </header>
+   <div className="ai-chat-context"><span aria-hidden="true">●</span>{context.type==='article'?`Discussing article #${context.articleId}`:'Ready to explore the news'}</div>
    {user&&<select aria-label="Previous conversations" value={conversationId??''} onChange={e=>e.target.value?selectConversation(Number(e.target.value)):newChat()}>
     <option value="">New conversation</option>{conversations.map(c=><option key={c.id} value={c.id}>{c.title}</option>)}
    </select>}
    <div className="ai-chat-messages" aria-live="polite">
-    {messages.length===0&&<p>Ask about news, find related stories, or discuss the article you're reading.</p>}
+    {messages.length===0&&<div className="ai-chat-welcome"><span aria-hidden="true">✦</span><strong>What would you like to know?</strong><p>Ask about news, find related stories, or discuss the article you are reading.</p></div>}
     {messages.map((m,i)=><div className={`ai-chat-bubble ${m.role}`} key={i}><strong>{m.role==='user'?'You':'Assistant'}</strong><p>{m.content}</p></div>)}
     {busy&&<p>Thinking…</p>}
     {articles.length>0&&<div className="ai-chat-links"><strong>Related articles</strong>{articles.map((a,i)=>
@@ -94,6 +100,6 @@ export default function AiChatWidget(){
    </form>
    {!user&&<small>Guest chats are temporary. Sign in to save conversations.</small>}
   </section>}
-  <button className="ai-chat-launcher" onClick={()=>setOpen(!open)} aria-label={open?'Close news chatbot':'Open news chatbot'}>{open?'×':'✦ Chat'}</button>
+  <button className="ai-chat-launcher" onClick={()=>setOpen(!open)} aria-label={open?'Close news chatbot':'Open news chatbot'}><span aria-hidden="true">{open?'×':'✦'}</span>{open?'Close':'Ask AI'}</button>
  </div>;
 }

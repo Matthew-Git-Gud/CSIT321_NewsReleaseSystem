@@ -87,7 +87,7 @@ const findPublishedById = async (articleId) => {
 const findPublished = async () => {
   const [rows] = await pool.execute(
     `SELECT a.article_id, a.author_id, a.category_id, a.title, a.summary,
-            a.created_at, a.updated_at, c.name AS category,
+            a.content, a.created_at, a.updated_at, c.name AS category,
             u.username AS author_username, u.full_name AS author_name
      FROM articles a
      JOIN categories c ON a.category_id = c.category_id

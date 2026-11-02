@@ -18,8 +18,8 @@ export default function ShareArticleModal({ articleId, onClose }: Props) {
  }
  return <div className="share-modal-backdrop" onMouseDown={e => { if (e.target === e.currentTarget) onClose(); }}>
   <section className="share-modal" role="dialog" aria-modal="true" aria-labelledby="share-modal-title">
-   <h2 id="share-modal-title">Share this article</h2>
-   {success ? <><p>Article shared successfully.</p><button type="button" onClick={onClose}>Done</button></> :
+   <header className="share-modal-header"><span aria-hidden="true">↗</span><div><p>Share with your circle</p><h2 id="share-modal-title">Send this article</h2></div></header>
+   {success ? <div className="share-success"><span aria-hidden="true">✓</span><p>Article shared successfully.</p><button type="button" onClick={onClose}>Done</button></div> :
    <form onSubmit={submit}>
     {friends.length > 0 && <><label htmlFor="share-friend">Or select a friend</label><select id="share-friend" value={friends.some(friend => friend.username === username) ? username : ''} onChange={e => setUsername(e.target.value)}><option value="">Choose a friend</option>{friends.map(friend => <option key={friend.user_id} value={friend.username}>{friend.full_name || friend.username} (@{friend.username})</option>)}</select></>}
     <label htmlFor="share-recipient">Recipient username</label>

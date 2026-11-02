@@ -29,6 +29,9 @@ export type ArticlePreview = {
   author_name: string;
   author_username: string;
 
+  // Optional first image from the article body, used only as a listing cover.
+  cover_image_url?: string | null;
+
   created_at: string;
   updated_at: string;
 };

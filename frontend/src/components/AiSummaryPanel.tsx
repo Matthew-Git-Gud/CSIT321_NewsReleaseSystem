@@ -43,25 +43,77 @@ export default function AiSummaryPanel({ articleId, canGenerate }: Props) {
   }
 
   return (
-    <section className="ai-summary-panel" aria-label="AI article summary">
+    <section
+      className={`ai-summary-panel ${summary ? "has-summary" : "is-empty"}`}
+      aria-label="AI article summary"
+    >
       <div className="ai-summary-heading">
-        <h2>✦ AI Summary</h2>
-        {summary && <button type="button" onClick={() => setCollapsed(value => !value)} aria-expanded={!collapsed}>{collapsed ? 'Expand' : 'Collapse'}</button>}
+        <div className="ai-summary-heading-copy">
+          <span className="ai-summary-mark" aria-hidden="true">✦</span>
+          <div>
+            <p className="ai-summary-eyebrow">Quick read</p>
+            <h2>AI article summary</h2>
+          </div>
+        </div>
+
+        {summary && (
+          <button
+            type="button"
+            className="ai-summary-toggle"
+            onClick={() => setCollapsed(value => !value)}
+            aria-expanded={!collapsed}
+          >
+            {collapsed ? "Show" : "Hide"}
+          </button>
+        )}
       </div>
-      {loading ? <p role="status">Loading summary…</p> : (
+
+      {loading ? (
+        <div className="ai-summary-loading" role="status">
+          <span />
+          <span />
+          <span />
+          <p>Checking for a saved summary…</p>
+        </div>
+      ) : (
         <>
-          {summary && !collapsed && <p className="ai-summary-text">{summary}</p>}
-          {!summary && <p>No AI summary has been generated for this article yet.</p>}
-          {!canGenerate && !summary && <p>Sign in to generate a summary.</p>}
+          {summary && !collapsed && (
+            <p className="ai-summary-text">{summary}</p>
+          )}
+
+          {!summary && (
+            <div className="ai-summary-empty">
+              <p>No quick summary has been created for this article yet.</p>
+              {!canGenerate && <span>Sign in to generate one.</span>}
+            </div>
+          )}
+
           {canGenerate && (
-            <button type="button" className="ai-summary-action" disabled={generating} onClick={() => handleGenerate(Boolean(summary))}>
-              {generating ? 'Generating…' : summary ? 'Regenerate summary' : 'Generate AI summary'}
+            <button
+              type="button"
+              className="ai-summary-action"
+              disabled={generating}
+              onClick={() => handleGenerate(Boolean(summary))}
+            >
+              <span aria-hidden="true">{generating ? "◌" : "✦"}</span>
+              {generating
+                ? "Generating summary…"
+                : summary
+                  ? "Regenerate summary"
+                  : "Generate AI summary"}
             </button>
           )}
         </>
       )}
-      {error && <p className="ai-summary-error" role="alert">{error}</p>}
-      <small>AI-generated content may contain errors. Check the original article for important details.</small>
+
+      {error && (
+        <p className="ai-summary-error" role="alert">{error}</p>
+      )}
+
+      <div className="ai-summary-footer">
+        <small>AI-generated content may contain errors. Check the original article for important details.</small>
+        {summary && <span>Summary ready</span>}
+      </div>
     </section>
   );
 }

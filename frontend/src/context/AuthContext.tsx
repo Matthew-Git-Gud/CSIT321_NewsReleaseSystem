@@ -14,8 +14,6 @@ import {
   type User,
 } from "../services/auth";
 
-import { waitForBackend } from "../services/backendReady";
-
 import { ROLES, type Role } from "../constants/roles";
 
 type AuthContextType = {

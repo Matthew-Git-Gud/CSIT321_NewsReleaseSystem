@@ -12,10 +12,12 @@ import {
   getPublishedArticles,
   type ArticlePreview,
 } from "../services/articles";
+import { useAuth } from "../context/AuthContext";
+import { ROLES } from "../constants/roles";
 
 /*
- * Every category receives a visual identity, including categories added later
- * through the database. This avoids blank-looking cards for new topics.
+ * Every category receives an accent identity, including categories added later
+ * through the database. This avoids generic-looking cards for new topics.
  */
 const ARTICLE_THEMES = [
   "article-theme-forest",
@@ -38,6 +40,7 @@ function getArticleTheme(category: string) {
 
 function Home() {
   const navigate = useNavigate();
+  const { role } = useAuth();
 
   const [articles, setArticles] =
     useState<ArticlePreview[]>([]);
@@ -144,6 +147,9 @@ function Home() {
     setActiveCategory("All");
   };
 
+  // The newest published article gives the hero a meaningful, live focal point.
+  const featuredArticle = articles[0];
+
   return (
     <main className="home-page">
       {/* ================= INTRO ================= */}
@@ -165,6 +171,34 @@ function Home() {
               Explore thoughtful reporting, useful local updates and
               perspectives worth sharing.
             </p>
+
+            <div className="intro-actions">
+              <a className="intro-primary-action" href="#latest">
+                Explore latest stories <span aria-hidden="true">→</span>
+              </a>
+
+              {role === ROLES.GUEST ? (
+                <button
+                  className="intro-secondary-action"
+                  type="button"
+                  onClick={() => navigate("/register")}
+                >
+                  Join the community
+                </button>
+              ) : (
+                <button
+                  className="intro-secondary-action"
+                  type="button"
+                  onClick={() =>
+                    navigate(
+                      role === ROLES.ADMIN ? "/admin" : "/publish",
+                    )
+                  }
+                >
+                  {role === ROLES.ADMIN ? "Open dashboard" : "Write a story"}
+                </button>
+              )}
+            </div>
 
             <label
               className="search"
@@ -194,24 +228,59 @@ function Home() {
             </div>
           </div>
 
-          {/* A CSS-built feature panel gives the landing page character without external images. */}
-          <aside className="intro-feature" aria-label="News Release System overview">
+          {/* This panel uses real article data so the homepage never feels like a static mock-up. */}
+          <aside className="intro-feature" aria-label="Featured community story">
             <div className="feature-topline">
-              <span>Community bulletin</span>
-              <span className="feature-status">Live</span>
+              <span>Featured story</span>
+              <span className="feature-status">Latest</span>
             </div>
 
-            <div className="feature-copy">
-              <p className="feature-number">01</p>
-              <p>Local stories.<br />Useful context.<br />Your perspective.</p>
-            </div>
-
-            <div className="feature-lines" aria-hidden="true">
-              <span />
-              <span />
-              <span />
-            </div>
+            {loading ? (
+              <div className="feature-loading" role="status" aria-label="Loading featured story">
+                <span />
+                <span />
+                <span />
+              </div>
+            ) : featuredArticle ? (
+              <div className="feature-story">
+                <p className="feature-category">{featuredArticle.category}</p>
+                <h2>{featuredArticle.title}</h2>
+                <p>{featuredArticle.summary}</p>
+                <button
+                  type="button"
+                  onClick={() => navigate(`/articles/${featuredArticle.article_id}`)}
+                >
+                  Read featured story <span aria-hidden="true">→</span>
+                </button>
+              </div>
+            ) : (
+              <div className="feature-story feature-story-empty">
+                <p className="feature-category">Community bulletin</p>
+                <h2>Your community’s stories start here.</h2>
+                <p>Come back soon to discover the latest news and perspectives.</p>
+              </div>
+            )}
           </aside>
+        </div>
+      </section>
+
+      <section className="home-promise" aria-label="What News Release System offers">
+        <div className="page-container home-promise-grid">
+          <article>
+            <span>01</span>
+            <h2>Discover</h2>
+            <p>Browse local stories and follow the topics that matter to you.</p>
+          </article>
+          <article>
+            <span>02</span>
+            <h2>Discuss</h2>
+            <p>Share perspectives and join respectful community conversations.</p>
+          </article>
+          <article>
+            <span>03</span>
+            <h2>Stay informed</h2>
+            <p>Save useful updates and return to them whenever you need them.</p>
+          </article>
         </div>
       </section>
 
@@ -299,21 +368,33 @@ function Home() {
               {filteredArticles.map(
                 (article) => (
                   <article
-                    className="article-card"
+                    className={`article-card ${getArticleTheme(article.category)}`}
                     key={article.article_id}
                   >
-                    <div
-                      className={`article-image ${getArticleTheme(article.category)} article-image-${article.category
-                        .toLowerCase()
-                        .replace(/\s+/g, "-")}`}
-                      aria-hidden="true"
-                    >
-                      <div className="article-image-overlay">
-                        <span className="article-image-category">
+                    {article.cover_image_url ? (
+                      <div className="article-card-image">
+                        <img
+                          src={article.cover_image_url}
+                          alt=""
+                          loading="lazy"
+                          onError={(event) => {
+                            // Keep the category overlay visible if a removed image cannot load.
+                            event.currentTarget.style.display = "none";
+                          }}
+                        />
+                        <div className="article-card-image-overlay">
+                          <span className="article-card-category">
+                            {article.category}
+                          </span>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="article-card-accent">
+                        <span className="article-card-category">
                           {article.category}
                         </span>
                       </div>
-                    </div>
+                    )}
 
                     <div className="article-body">
                       

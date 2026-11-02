@@ -51,6 +51,10 @@ export const menuByRole: Record<Role, MenuItem[]> = {
       path: "/my-articles",
     },
     {
+      label: "Friends",
+      path: "/friends",
+    },
+    {
       label: "Shared with me",
       path: "/shared-articles",
     },

@@ -54,14 +54,18 @@ const config = {
   },
   image: {
     toolbar: ["imageTextAlternative", "toggleImageCaption", "|", "imageStyle:inline", "imageStyle:alignLeft", "imageStyle:alignCenter", "imageStyle:alignRight", "imageStyle:alignBlockLeft", "imageStyle:alignBlockRight", "|", "resizeImage"],
-    styles: ["inline", "block", "alignLeft", "alignCenter", "alignRight", "alignBlockLeft", "alignBlockRight"],
+    // CKEditor 49 expects the options inside a styles object, rather than a bare array.
+    styles: {
+      options: ["inline", "block", "alignLeft", "alignCenter", "alignRight", "alignBlockLeft", "alignBlockRight"],
+    },
     resizeOptions: [
       { name: "resizeImage:original", value: null, label: "Original" },
       { name: "resizeImage:25", value: "25", label: "25%" },
       { name: "resizeImage:50", value: "50", label: "50%" },
       { name: "resizeImage:75", value: "75", label: "75%" },
     ],
-    resizeUnit: "%",
+    // Keep this as a literal so it matches CKEditor's allowed resize units.
+    resizeUnit: "%" as const,
   },
   table: {
     contentToolbar: [

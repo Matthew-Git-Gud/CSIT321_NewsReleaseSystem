@@ -51,6 +51,18 @@ import AiSummaryPanel from "../components/AiSummaryPanel";
 import "../styles/ArticleMedia.css";
 import "../styles/RelatedArticles.css";
 
+// HTML is stored for rich articles, so strip tags before estimating the reading time.
+function estimateReadingMinutes(content: string) {
+  const words = content
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean).length;
+
+  return Math.max(1, Math.ceil(words / 220));
+}
+
 function ArticleView() {
   const [viewCount, setViewCount] = useState(0);
   const [relatedArticles, setRelatedArticles] = useState<ArticlePreview[]>([]);
@@ -63,6 +75,26 @@ function ArticleView() {
   // Public article sharing: no authentication or backend request required.
   const [showShareModal, setShowShareModal] = useState(false);
   const [copyLinkStatus, setCopyLinkStatus] = useState<"idle" | "copied" | "error">("idle");
+  const [readingProgress, setReadingProgress] = useState(0);
+
+  useEffect(() => {
+    // The progress bar is a client-side reading aid; it does not store any user activity.
+    const updateReadingProgress = () => {
+      const scrollableHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = scrollableHeight > 0
+        ? Math.min(100, Math.max(0, (window.scrollY / scrollableHeight) * 100))
+        : 0;
+
+      setReadingProgress(progress);
+    };
+
+    updateReadingProgress();
+    window.addEventListener("scroll", updateReadingProgress, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", updateReadingProgress);
+    };
+  }, [articleId]);
 
   const handleCopyArticleLink = async () => {
     if (!articleId) return;
@@ -885,8 +917,20 @@ function ArticleView() {
     );
   }
 
+  const readingMinutes = estimateReadingMinutes(article.content);
+
   return (
     <main className="article-view-page">
+      <div
+        className="article-reading-progress"
+        role="progressbar"
+        aria-label="Article reading progress"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={Math.round(readingProgress)}
+      >
+        <span style={{ transform: `scaleX(${readingProgress / 100})` }} />
+      </div>
 
       {/* =========================
           ARTICLE
@@ -894,15 +938,26 @@ function ArticleView() {
 
       <article className="article-view">
         <header className="article-view-header">
+          <nav className="article-breadcrumbs" aria-label="Breadcrumb">
+            <Link to="/">Latest stories</Link>
+            <span aria-hidden="true">/</span>
+            <span>{article.category}</span>
+          </nav>
 
-          <Link
-            className="category"
-            to={`/?category=${encodeURIComponent(
-              article.category,
-            )}`}
-          >
-            {article.category}
-          </Link>
+          <div className="article-category-row">
+            <Link
+              className="category"
+              to={`/?category=${encodeURIComponent(
+                article.category,
+              )}`}
+            >
+              {article.category}
+            </Link>
+
+            <span className="article-read-time">
+              {readingMinutes} min read
+            </span>
+          </div>
 
           <h1>
             {article.title}
@@ -1191,6 +1246,12 @@ function ArticleView() {
           />
 
         </div>
+
+        <footer className="article-end-mark">
+          <span aria-hidden="true">✦</span>
+          <p>You have reached the end of this story.</p>
+          <Link to="/">Explore more community news <span aria-hidden="true">→</span></Link>
+        </footer>
 
       </article>
 
@@ -1689,21 +1750,41 @@ function ArticleView() {
       </section>
 
       <section className="related-articles" aria-labelledby="related-articles-heading">
-        <h2 id="related-articles-heading">Related articles</h2>
-        {relatedLoading && <p>Finding related articles...</p>}
+        <header className="related-articles-header">
+          <div>
+            <p className="eyebrow">Keep reading</p>
+            <h2 id="related-articles-heading">More on this topic</h2>
+            <p>Explore related stories from the News Release community.</p>
+          </div>
+          <Link className="related-discover-link" to="/discover">
+            Discover news <span aria-hidden="true">→</span>
+          </Link>
+        </header>
+
+        {relatedLoading && (
+          <div className="related-articles-loading" role="status" aria-label="Finding related articles">
+            <span /><span /><span />
+          </div>
+        )}
         {!relatedLoading && relatedArticles.length === 0 && (
-          <p>No related articles available yet.</p>
+          <div className="related-articles-empty">
+            <span aria-hidden="true">✦</span>
+            <p>No related articles available yet.</p>
+          </div>
         )}
         {!relatedLoading && relatedArticles.length > 0 && (
           <div className="related-articles-grid">
             {relatedArticles.map(item => (
               <article key={item.article_id} className="related-article-card">
-                <span>{item.category}</span>
+                <span className="related-article-category">{item.category}</span>
                 <h3>
                   <Link to={`/articles/${item.article_id}`}>{item.title}</Link>
                 </h3>
                 <p>{item.summary}</p>
-                <small>{new Date(item.created_at).toLocaleDateString()}</small>
+                <footer>
+                  <small>{new Date(item.created_at).toLocaleDateString()}</small>
+                  <Link to={`/articles/${item.article_id}`}>Read story <span aria-hidden="true">→</span></Link>
+                </footer>
               </article>
             ))}
           </div>

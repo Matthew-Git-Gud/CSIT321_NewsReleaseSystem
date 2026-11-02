@@ -1,1 +1,30 @@
-.notification-bell{position:relative;display:inline-flex;align-items:center}.notification-bell__button{background:transparent;border:1px solid currentColor;border-radius:8px;padding:7px 10px;cursor:pointer}.notification-bell__count{background:#b91c1c;color:white;border-radius:999px;padding:1px 6px;font-size:12px}.notification-bell__panel{position:absolute;z-index:1000;top:calc(100% + 8px);right:0;width:min(360px,90vw);max-height:420px;overflow:auto;background:var(--card-bg,#fff);color:var(--text-color,#222);border:1px solid #9995;box-shadow:0 10px 30px #0002;border-radius:10px;padding:12px}.notification-bell__header{display:flex;justify-content:space-between;gap:8px}.notification-bell__panel ul{list-style:none;padding:0;margin:10px 0}.notification-bell__panel li{padding:10px 5px;border-top:1px solid #9993}.notification-bell__unread{font-weight:700}.notification-bell__panel li small{display:block;opacity:.65;margin-top:4px}.notification-bell__panel button{cursor:pointer}
+.notification-bell { position: relative; display: inline-flex; align-items: center; }
+
+.notification-bell__button { position: relative; display: grid; width: 38px; height: 38px; place-items: center; border: 1px solid var(--border); border-radius: 11px; background: var(--surface); color: var(--text-secondary); transition: background-color 0.18s ease, color 0.18s ease, transform 0.18s ease; }
+.notification-bell__button:hover, .notification-bell__button[aria-expanded="true"] { background: var(--primary-soft); color: var(--primary); transform: translateY(-1px); }
+.notification-bell__button svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
+
+.notification-bell__count { position: absolute; top: -6px; right: -7px; min-width: 18px; padding: 2px 5px; border: 2px solid var(--surface); border-radius: var(--radius-pill); background: var(--danger); color: #fff; font-size: 0.62rem; font-weight: 800; line-height: 1.1; text-align: center; }
+
+.notification-bell__panel { position: absolute; top: calc(100% + 12px); right: 0; z-index: 1100; width: min(390px, calc(100vw - 28px)); max-height: min(520px, calc(100dvh - 100px)); overflow: auto; border: 1px solid var(--border); border-radius: 18px; background: var(--surface); box-shadow: var(--shadow-card-hover); }
+
+.notification-bell__header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 16px; border-bottom: 1px solid var(--border-light); background: linear-gradient(115deg, var(--surface-soft), var(--surface)); }
+.notification-bell__header span, .notification-bell__header strong { display: block; }
+.notification-bell__header span { color: var(--primary); font-size: 0.68rem; font-weight: 800; letter-spacing: 0.09em; text-transform: uppercase; }
+.notification-bell__header strong { margin-top: 2px; font-family: Georgia, serif; font-size: 1.2rem; }
+.notification-bell__header button { padding: 7px 9px; border: 0; border-radius: 8px; background: transparent; color: var(--primary); font-size: 0.76rem; font-weight: 800; }
+.notification-bell__header button:hover:not(:disabled) { background: var(--primary-soft); }
+.notification-bell__header button:disabled { color: var(--text-muted); }
+
+.notification-bell__panel ul { margin: 0; padding: 0; list-style: none; }
+.notification-bell__panel li { position: relative; padding: 14px 16px; border-bottom: 1px solid var(--border-light); }
+.notification-bell__panel li:last-child { border-bottom: 0; }
+.notification-bell__panel li.notification-bell__unread { background: color-mix(in srgb, var(--primary-soft) 58%, transparent); }
+.notification-bell__panel li.notification-bell__unread::before { position: absolute; top: 20px; left: 6px; width: 5px; height: 5px; border-radius: 50%; background: var(--primary); content: ""; }
+.notification-bell__panel li a, .notification-bell__panel li button { display: block; padding: 0; border: 0; background: transparent; color: var(--text); font-size: 0.87rem; line-height: 1.42; text-align: left; text-decoration: none; }
+.notification-bell__panel li a:hover { color: var(--primary); }
+.notification-bell__panel li small { display: block; margin-top: 5px; color: var(--text-muted); font-size: 0.72rem; }
+
+.notification-bell__empty { display: grid; min-height: 165px; place-content: center; gap: 8px; padding: 24px; color: var(--text-muted); text-align: center; }
+.notification-bell__empty span { color: var(--primary); font-size: 1.35rem; }
+.notification-bell__empty p { margin: 0; font-size: 0.9rem; }
