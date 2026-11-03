@@ -48,6 +48,7 @@ import { ROLES } from "../constants/roles";
 import DOMPurify from "dompurify";
 import ShareArticleModal from "../components/ShareArticleModal";
 import AiSummaryPanel from "../components/AiSummaryPanel";
+import ArticleAudioControls from "../components/ArticleAudioControls";
 import "../styles/ArticleMedia.css";
 import "../styles/RelatedArticles.css";
 
@@ -966,6 +967,12 @@ function ArticleView() {
           <p className="article-summary">
             {article.summary}
           </p>
+
+          <ArticleAudioControls
+            title={article.title}
+            summary={article.summary}
+            contentHtml={article.content}
+          />
 
           <div className="article-meta">
 
