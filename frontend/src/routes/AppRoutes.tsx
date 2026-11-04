@@ -25,6 +25,7 @@ import SharedArticles from "../pages/SharedArticles";
 import AdminDashboard from "../pages/AdminDashboard";
 import UserManagement from "../pages/UserManagement";
 import AdminEditArticle from "../pages/AdminEditArticle";
+import AdminCredibility from "../pages/AdminCredibility";
 import Friends from "../pages/Friends";
 import { ROLES } from "../constants/roles";
 import type { AccentColour } from "../constants/appearance";
@@ -215,6 +216,15 @@ function AppRoutes({
                 ]}
               >
                 <UserManagement />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/credibility"
+            element={
+              <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
+                <AdminCredibility />
               </ProtectedRoute>
             }
           />

@@ -19,10 +19,7 @@ export const menuByRole: Record<Role, MenuItem[]> = {
       label: "Categories",
       path: "/#categories",
     },
-    {
-      label: "About",
-      path: "/#about",
-    },
+    
   ],
 
   [ROLES.REGISTERED]: [
@@ -66,17 +63,10 @@ export const menuByRole: Record<Role, MenuItem[]> = {
       label: "Preferences",
       path: "/preferences",
     },
-    {
-      label: "About",
-      path: "/#about",
-    },
+    
   ],
 
   [ROLES.ADMIN]: [
-    {
-      label: "Discover",
-      path: "/discover",
-    },
     {
       label: "Dashboard",
       path: "/admin",
@@ -84,6 +74,10 @@ export const menuByRole: Record<Role, MenuItem[]> = {
     {
       label: "User Management",
       path: "/admin/users",
+    },
+    {
+      label: "Credibility Moderation",
+      path: "/admin/credibility",
     },
     {
       label: "Preferences",

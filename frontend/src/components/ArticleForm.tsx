@@ -1,4 +1,6 @@
 import "../styles/cover-image.css";
+import "../styles/article-sources.css";
+import "../styles/article-credibility.css";
 import {
   type FormEvent,
   useEffect,
@@ -18,6 +20,63 @@ import type {
 import RichTextEditor from "./RichTextEditor";
 import { uploadArticleMedia } from "../services/media";
 import { generateCoverImage, generateCoverPrompt } from "../services/aiCoverImages";
+import { analyseArticleCredibility, type CredibilityAssessment } from "../services/aiCredibility";
+
+const SOURCES_MARKER = 'data-article-sources="true"';
+
+function extractArticleSources(html: string): { content: string; urls: string[] } {
+  if (typeof DOMParser === "undefined") return { content: html, urls: [] };
+  const doc = new DOMParser().parseFromString(html || "", "text/html");
+  const section = doc.querySelector(`[${SOURCES_MARKER}]`);
+  const urls = section
+    ? Array.from(section.querySelectorAll("a[href]"))
+        .map((link) => link.getAttribute("href") || "")
+        .filter((url) => /^https?:\/\//i.test(url))
+    : [];
+  section?.remove();
+  return { content: doc.body.innerHTML, urls };
+}
+
+function buildArticleContent(content: string, urls: string[]): string {
+  const uniqueUrls = Array.from(new Set(urls.map((url) => url.trim()).filter(Boolean)));
+  if (!uniqueUrls.length) return content;
+  const escapeHtml = (value: string) => value.replace(/[&<>"']/g, (char) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+  }[char] || char));
+  const links = uniqueUrls.map((url) => {
+    let label = url;
+    try { label = new URL(url).hostname.replace(/^www\./, ""); } catch { /* validated before saving */ }
+    return `<li><a href="${escapeHtml(url)}">${escapeHtml(label)}</a></li>`;
+  }).join("");
+  return `${content}<div class="article-sources" ${SOURCES_MARKER}><h2>Sources &amp; References</h2><ul>${links}</ul></div>`;
+}
+
+function isValidSourceUrl(value: string): boolean {
+  try {
+    const parsed = new URL(value.trim());
+    return (parsed.protocol === "http:" || parsed.protocol === "https:") && Boolean(parsed.hostname);
+  } catch { return false; }
+}
+
+function credibilityClassificationLabel(value: CredibilityAssessment["classification"]): string {
+  const labels = {
+    supported: "Supported",
+    insufficient_evidence: "Insufficient evidence",
+    partially_supported: "Partially supported",
+    contradictory: "Contradictory — admin investigation",
+  };
+  return labels[value];
+}
+
+function claimStatusLabel(value: CredibilityAssessment["claims"][number]["status"]): string {
+  const labels = {
+    supported: "Supported",
+    not_verified: "Not verified",
+    contradicted: "Contradicted",
+    opinion_or_non_factual: "Opinion / non-factual",
+  };
+  return labels[value];
+}
 
 type ArticleFormProps = {
   initialValues?: ArticleFormData;
@@ -48,9 +107,13 @@ function ArticleForm({
       : "",
   );
 
-  const [content, setContent] = useState(
-    initialValues?.content ?? "",
-  );
+  const [initialContent] = useState(() => extractArticleSources(initialValues?.content ?? ""));
+  const [content, setContent] = useState(initialContent.content);
+  const [sourceText, setSourceText] = useState(initialContent.urls.join("\n"));
+  const [sourceError, setSourceError] = useState("");
+  const [credibilityLoading, setCredibilityLoading] = useState(false);
+  const [credibilityError, setCredibilityError] = useState("");
+  const [credibilityReport, setCredibilityReport] = useState<CredibilityAssessment | null>(null);
 
   const [featuredImageUrl, setFeaturedImageUrl] = useState(
     initialValues?.featured_image_url ?? "",
@@ -75,11 +138,6 @@ function ArticleForm({
     categoryError,
     setCategoryError,
   ] = useState("");
-
-  // The image generator needs enough article context to create a relevant cover.
-  const canGenerateCover = Boolean(
-    title.trim() && summary.trim() && content.trim() && categoryId,
-  );
 
   useEffect(() => {
     const loadCategories = async () => {
@@ -157,16 +215,23 @@ function ArticleForm({
     setCoverError("");
     try {
       const imageResponse = await fetch(generatedCoverDataUrl);
+      if (!imageResponse.ok) throw new Error("Unable to read the generated cover image.");
       const blob = await imageResponse.blob();
-      const mimeType = blob.type || "image/png";
-      const extensionByMime: Record<string, string> = {
+
+      // Preserve the actual format returned by Azure/FLUX. Do not label every
+      // generated image as PNG: /api/media validates MIME type against bytes.
+      const mimeType = blob.type.toLowerCase();
+      const extensions: Record<string, string> = {
         "image/jpeg": "jpg",
         "image/png": "png",
         "image/gif": "gif",
         "image/webp": "webp",
       };
-      const extension = extensionByMime[mimeType];
-      if (!extension) throw new Error(`Generated image format is not supported: ${mimeType}`);
+      const extension = extensions[mimeType];
+      if (!extension || blob.size === 0) {
+        throw new Error("Generated image has an unsupported or empty file format.");
+      }
+
       const file = new File([blob], `article-cover-${Date.now()}.${extension}`, { type: mimeType });
       const result = await uploadArticleMedia(file);
       if (result.type !== "image") throw new Error("Generated file was not accepted as an image.");
@@ -179,9 +244,63 @@ function ArticleForm({
     }
   };
 
+  const getSourceUrls = (): string[] | null => {
+    const entries = sourceText
+      .split(/\r?\n/)
+      .map((url) => url.trim())
+      .filter(Boolean);
+    const invalid = entries.find((url) => !isValidSourceUrl(url));
+    if (invalid) {
+      setSourceError(`Invalid source URL: ${invalid}`);
+      return null;
+    }
+    const unique = Array.from(new Set(entries.map((url) => url.toLowerCase())));
+    if (unique.length !== entries.length) {
+      setSourceError("Please remove duplicate source URLs.");
+      return null;
+    }
+    setSourceError("");
+    return entries;
+  };
+
+  const handleCredibilityAnalysis = async () => {
+    if (!title.trim()) {
+      setCredibilityError("Enter an article headline before running credibility analysis.");
+      return;
+    }
+    if (!content.trim()) {
+      setCredibilityError("Add article content before running credibility analysis.");
+      return;
+    }
+    const urls = getSourceUrls();
+    if (urls === null) {
+      setCredibilityError("Please correct the cited source URLs before analysing.");
+      return;
+    }
+    if (!urls.length) {
+      setCredibilityError("Add at least one cited source before running credibility analysis.");
+      return;
+    }
+
+    setCredibilityLoading(true);
+    setCredibilityError("");
+    setCredibilityReport(null);
+    try {
+      const articleHtml = buildArticleContent(content.trim(), urls);
+      const report = await analyseArticleCredibility({ title: title.trim(), content: articleHtml });
+      setCredibilityReport(report);
+    } catch (error) {
+      setCredibilityError(error instanceof Error ? error.message : "Unable to analyse article credibility.");
+    } finally {
+      setCredibilityLoading(false);
+    }
+  };
+
   const submitArticle = async (
     status: CreateArticleStatus,
   ) => {
+    const urls = getSourceUrls();
+    if (urls === null) return;
     await onSubmit({
       title: title.trim(),
 
@@ -189,7 +308,7 @@ function ArticleForm({
 
       category_id: Number(categoryId),
 
-      content: content.trim(),
+      content: buildArticleContent(content.trim(), urls),
 
       featured_image_url: featuredImageUrl || null,
 
@@ -303,24 +422,18 @@ function ArticleForm({
 
 
       <section className="form-group cover-image-section" aria-labelledby="cover-image-heading">
-        <div className="cover-image-heading-row">
-          <div>
-            <label id="cover-image-heading">Cover Image</label>
-            <p className="field-helper">Choose an image to represent your article on the homepage and article listings.</p>
-          </div>
-          <span className="cover-image-format">16:9 works best</span>
-        </div>
+        <label id="cover-image-heading">Cover Image</label>
+        <p className="field-helper">Choose an image to represent your article on the homepage and article listings.</p>
 
         {generatedCoverDataUrl && (
           <div className="cover-image-preview">
             <img src={generatedCoverDataUrl} alt="AI-generated cover preview" />
-            <p className="cover-image-preview-label">AI cover preview</p>
             <div className="cover-image-actions">
-              <button className="cover-image-primary-button" type="button" disabled={coverAccepting || coverGenerating || loading} onClick={() => { void handleAcceptGeneratedCover(); }}>
+              <button type="button" disabled={coverAccepting || coverGenerating || loading} onClick={() => { void handleAcceptGeneratedCover(); }}>
                 {coverAccepting ? "Saving..." : "Accept generated image"}
               </button>
-              <button className="cover-image-secondary-button" type="button" disabled={coverAccepting || coverGenerating || loading || coverGenerations >= 3} onClick={() => { void handleGenerateCover(); }}>Regenerate</button>
-              <button className="cover-image-danger-button" type="button" disabled={coverAccepting || coverGenerating || loading} onClick={() => setGeneratedCoverDataUrl("")}>Discard</button>
+              <button type="button" disabled={coverAccepting || coverGenerating || loading || coverGenerations >= 3} onClick={() => { void handleGenerateCover(); }}>Regenerate</button>
+              <button type="button" disabled={coverAccepting || coverGenerating || loading} onClick={() => setGeneratedCoverDataUrl("")}>Discard</button>
             </div>
             <small className="field-helper">Style: {generatedCoverStyle === "photorealistic" ? "Photorealistic" : "Editorial illustration"}</small>
           </div>
@@ -330,14 +443,14 @@ function ArticleForm({
           <div className="cover-image-preview">
             <img src={featuredImageUrl} alt="Article cover preview" />
             <div className="cover-image-actions">
-              <label className="cover-image-upload-button cover-image-secondary-button">
+              <label className="cover-image-upload-button">
                 Replace image
                 <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" hidden disabled={coverUploading || loading} onChange={event => { void handleCoverUpload(event.target.files?.[0]); event.currentTarget.value = ""; }} />
               </label>
-              <button className="cover-image-danger-button" type="button" disabled={coverUploading || loading} onClick={() => setFeaturedImageUrl("")}>Remove</button>
+              <button type="button" disabled={coverUploading || loading} onClick={() => setFeaturedImageUrl("")}>Remove</button>
             </div>
             <div className="cover-image-actions">
-              <button className="cover-image-ai-button" type="button" disabled={!canGenerateCover || coverGenerating || coverUploading || loading || coverGenerations >= 3} onClick={() => { void handleGenerateCover(); }}>
+              <button type="button" disabled={coverGenerating || coverUploading || loading || coverGenerations >= 3} onClick={() => { void handleGenerateCover(); }}>
                 {coverGenerating ? "Generating..." : "Generate a new cover with AI"}
               </button>
             </div>
@@ -346,26 +459,21 @@ function ArticleForm({
           <div className="cover-image-empty">
             <span>No cover image selected</span>
             <div className="cover-image-actions">
-              <label className="cover-image-upload-button cover-image-primary-button">
+              <label className="cover-image-upload-button">
                 {coverUploading ? "Uploading..." : "Upload image"}
                 <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" hidden disabled={coverUploading || loading} onChange={event => { void handleCoverUpload(event.target.files?.[0]); event.currentTarget.value = ""; }} />
               </label>
-              <button className="cover-image-ai-button" type="button" disabled={!canGenerateCover || coverGenerating || coverUploading || loading || coverGenerations >= 3} onClick={() => { void handleGenerateCover(); }}>
+              <button type="button" disabled={coverGenerating || coverUploading || loading || coverGenerations >= 3} onClick={() => { void handleGenerateCover(); }}>
                 {coverGenerating ? "Generating..." : "Generate with AI"}
               </button>
             </div>
           </div>
         )}
-        {!canGenerateCover && !generatedCoverDataUrl && (
-          <p className="cover-image-readiness">Add a title, summary, category and article content to unlock AI cover generation.</p>
-        )}
-        {coverUploading && <p className="field-helper" aria-live="polite">Uploading cover image...</p>}
-        {coverGenerating && <p className="field-helper" aria-live="polite">Creating an image prompt and generating your cover. This may take a little while...</p>}
-        <div className="cover-image-guidance">
-          <small className="field-helper">AI generations used: {coverGenerations}/3 for this editing session.</small>
-          <small className="field-helper">Recommended: landscape image, ideally 16:9. You can publish without a cover image.</small>
-        </div>
+        {coverUploading && <p className="field-helper">Uploading cover image...</p>}
+        {coverGenerating && <p className="field-helper">Creating an image prompt and generating your cover. This may take a little while...</p>}
+        <small className="field-helper">AI generations used: {coverGenerations}/3 for this editing session.</small>
         {coverError && <p className="form-error">{coverError}</p>}
+        <small className="field-helper">Recommended: landscape image, ideally 16:9. You can publish without a cover image.</small>
       </section>
 
       <div className="form-group">
@@ -378,6 +486,93 @@ function ArticleForm({
           onChange={setContent}
         />
       </div>
+
+      <section className="form-group article-sources-editor" aria-labelledby="article-sources-heading">
+        <label htmlFor="article-sources-heading">Cited Sources</label>
+        <p className="field-helper">Paste the URLs used as references for this article, one URL per line. These links will be saved with the article and used by AI credibility analysis.</p>
+        <textarea
+          id="article-sources-heading"
+          className="article-sources-textarea"
+          value={sourceText}
+          onChange={(event) => { setSourceText(event.target.value); setSourceError(""); }}
+          placeholder={"https://example.com/news/article-1\nhttps://example.com/news/article-2"}
+          rows={5}
+          disabled={loading}
+        />
+        {sourceError && <p className="form-error">{sourceError}</p>}
+        <small className="field-helper">You can include multiple sources. Each URL must start with http:// or https://. References are optional.</small>
+      </section>
+
+      <section className="form-group credibility-section" aria-labelledby="credibility-heading">
+        <div className="credibility-heading-row">
+          <div>
+            <label id="credibility-heading">AI Credibility Analysis</label>
+            <p className="field-helper">Compare factual claims in this article against the cited sources. Results are advisory and do not automatically affect publication.</p>
+          </div>
+          <button
+            type="button"
+            className="credibility-analyse-button"
+            disabled={loading || credibilityLoading || coverGenerating || coverUploading || coverAccepting}
+            onClick={() => { void handleCredibilityAnalysis(); }}
+          >
+            {credibilityLoading ? "Analysing..." : "Analyse credibility"}
+          </button>
+        </div>
+        {credibilityLoading && <p className="field-helper">Retrieving cited webpages and comparing article claims. This may take a little while.</p>}
+        {credibilityError && <p className="form-error" role="alert">{credibilityError}</p>}
+        {credibilityReport && (
+          <div className="credibility-report" aria-live="polite">
+            <div className="credibility-report-topline">
+              <strong>Assessment: {credibilityClassificationLabel(credibilityReport.classification)}</strong>
+              <span className={`credibility-status credibility-status-${credibilityReport.classification}`}>
+                {credibilityClassificationLabel(credibilityReport.classification)}
+              </span>
+            </div>
+            {credibilityReport.summary && <p>{credibilityReport.summary}</p>}
+            <p className="field-helper">Sources retrieved: {credibilityReport.retrievedCount} · Unavailable: {credibilityReport.unavailableCount}</p>
+            {credibilityReport.claims.length > 0 ? (
+              <div className="credibility-claims">
+                <strong>Claim-by-claim findings</strong>
+                {credibilityReport.claims.map((claim, index) => (
+                  <article className="credibility-claim" key={`${index}-${claim.claim.slice(0, 30)}`}>
+                    <div className="credibility-claim-heading">
+                      <strong>{claim.claim}</strong>
+                      <span className={`credibility-status credibility-status-${claim.status}`}>{claimStatusLabel(claim.status)}</span>
+                    </div>
+                    {claim.explanation && <p>{claim.explanation}</p>}
+                    {claim.evidence.length > 0 && (
+                      <ul className="credibility-evidence-list">
+                        {claim.evidence.map((item, evidenceIndex) => (
+                          <li key={`${item.source_url || "source"}-${evidenceIndex}`}>
+                            {item.source_url ? <a href={item.source_url} target="_blank" rel="noreferrer">{item.source_title || item.source_url}</a> : (item.source_title || "Source")}
+                            {item.explanation && <span> — {item.explanation}</span>}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </article>
+                ))}
+              </div>
+            ) : <p className="field-helper">No factual claims were returned for assessment.</p>}
+            {credibilityReport.sources.length > 0 && (
+              <div className="credibility-sources-list">
+                <strong>Source retrieval</strong>
+                <ul>
+                  {credibilityReport.sources.map((source, index) => (
+                    <li key={`${source.url}-${index}`}>
+                      <a href={source.url} target="_blank" rel="noreferrer">{source.title || source.url}</a>
+                      <span className={source.status === "retrieved" ? "credibility-source-ok" : "credibility-source-unavailable"}>
+                        {source.status === "retrieved" ? " Retrieved" : ` Unavailable: ${source.message || "Could not retrieve"}`}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            <p className="credibility-moderation-notice">{credibilityReport.moderationNotice || "AI findings are advisory. An administrator must review evidence before taking moderation action. Missing evidence is not proof that a claim is false."}</p>
+          </div>
+        )}
+      </section>
 
       <div className="article-form-actions">
         <button

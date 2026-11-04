@@ -1,4 +1,5 @@
 const repository = require('./articleRepository');
+const credibilityAutomation = require('../ai/aiCredibilityAutomation');
 
 class ArticleError extends Error {
   constructor(status, message) {
@@ -27,6 +28,9 @@ const createArticle = async (body, authorId) => {
     content: body.content.trim(), featured_image_url: body.featured_image_url || null, status,
   });
   const article = await repository.findCreatedArticle(id);
+  if (status === 'published' && article) {
+    credibilityAutomation.scheduleArticleAnalysis(article);
+  }
   return {
     message: status === 'published' ? 'Article published successfully' : 'Draft saved successfully',
     article,
@@ -61,6 +65,10 @@ const updateArticle = async (articleId, authorId, body) => {
     status: body.status,
   });
   if (!affected) throw new ArticleError(404, 'Article not found');
+  if (body.status === 'published') {
+    const article = await repository.findCredibilityArticle(articleId, authorId);
+    if (article) credibilityAutomation.scheduleArticleAnalysis(article);
+  }
   return { message: 'Article updated successfully' };
 };
 

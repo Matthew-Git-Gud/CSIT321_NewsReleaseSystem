@@ -28,7 +28,7 @@ export default function AiSummaryPanel({ articleId, canGenerate }: Props) {
   }, [articleId]);
 
   async function handleGenerate(force: boolean) {
-    if (generating || !canGenerate) return;
+    if (generating || (force && !canGenerate)) return;
     const id = requestId.current;
     setGenerating(true);
     setError('');
@@ -84,11 +84,11 @@ export default function AiSummaryPanel({ articleId, canGenerate }: Props) {
           {!summary && (
             <div className="ai-summary-empty">
               <p>No quick summary has been created for this article yet.</p>
-              {!canGenerate && <span>Sign in to generate one.</span>}
+              <span>You can generate a summary without signing in.</span>
             </div>
           )}
 
-          {canGenerate && (
+          {(!summary || canGenerate) && (
             <button
               type="button"
               className="ai-summary-action"
@@ -102,6 +102,9 @@ export default function AiSummaryPanel({ articleId, canGenerate }: Props) {
                   ? "Regenerate summary"
                   : "Generate AI summary"}
             </button>
+          )}
+          {summary && !canGenerate && (
+            <p className="ai-summary-note">Sign in to regenerate this summary. Everyone can view the saved summary.</p>
           )}
         </>
       )}

@@ -1,0 +1,23 @@
+.article-sources-editor {
+  margin-top: 16px;
+}
+
+.article-sources-textarea {
+  display: block;
+  width: 100%;
+  min-height: 120px;
+  resize: vertical;
+  box-sizing: border-box;
+  font: inherit;
+  line-height: 1.5;
+  padding: 12px;
+  border: 1px solid var(--border-color, #d8dce3);
+  border-radius: 8px;
+  background: var(--input-background, #fff);
+  color: inherit;
+}
+
+.article-sources-textarea:focus {
+  outline: 2px solid var(--focus-color, #3978d6);
+  outline-offset: 1px;
+}

@@ -1,0 +1,24 @@
+.admin-credibility-page { min-height: calc(100vh - 80px); padding: 42px 24px 80px; color: var(--text); }
+.admin-credibility-container { max-width: 1120px; margin: 0 auto; }
+.credibility-heading { display:flex; justify-content:space-between; align-items:flex-end; gap:24px; margin-bottom:28px; }
+.credibility-heading h1 { margin:0; font: 700 clamp(2rem,4vw,3rem)/1.08 Georgia,serif; }
+.credibility-heading p:not(.credibility-eyebrow) { color:var(--text-secondary); max-width:700px; }
+.credibility-eyebrow { color:var(--text-secondary); font-size:.75rem; letter-spacing:.12em; font-weight:700; }
+.credibility-heading button,.credibility-actions button,.credibility-expand { border:1px solid var(--border-light); background:var(--surface); color:var(--text); border-radius:8px; padding:9px 13px; cursor:pointer; }
+.credibility-summary { display:flex; align-items:baseline; gap:10px; background:var(--surface); border:1px solid var(--border-light); border-radius:10px; padding:17px 20px; margin-bottom:20px; }
+.credibility-summary strong { font:700 1.8rem Georgia,serif; }.credibility-summary span,.credibility-meta { color:var(--text-secondary); font-size:.85rem; }
+.credibility-list { display:grid; gap:16px; }.credibility-card,.credibility-empty { background:var(--surface); border:1px solid var(--border-light); border-radius:12px; padding:22px; }
+.credibility-card-top { display:flex; justify-content:space-between; gap:18px; }.credibility-card-top h2 { margin:10px 0 5px; font-size:1.25rem; }.credibility-card-top p { color:var(--text-secondary); margin:0; font-size:.85rem; }.credibility-card-top a,.credibility-evidence a,.credibility-source a { color:var(--accent,#287b68); }
+.credibility-badge,.claim-status { display:inline-block; border-radius:999px; padding:4px 9px; font-size:.75rem; font-weight:700; background:var(--surface-secondary); }.credibility-badge.contradictory,.claim-status.contradicted { color:#b42318; background:#fee4e2; }.credibility-badge.partially_supported,.claim-status.not_verified { color:#9a6700; background:#fff1c2; }
+.credibility-report-summary { line-height:1.55; }.credibility-meta { margin:10px 0 14px; }.credibility-expand { margin-bottom:14px; }.credibility-details { border-top:1px solid var(--border-light); padding-top:12px; margin-bottom:18px; }.credibility-claim { padding:13px 0; border-bottom:1px solid var(--border-light); }.credibility-claim-heading { display:flex; justify-content:space-between; gap:12px; }.credibility-claim p,.credibility-evidence p { color:var(--text-secondary); font-size:.9rem; line-height:1.5; }.credibility-evidence { margin:10px 0 0 12px; padding-left:12px; border-left:2px solid var(--border-light); }.credibility-details h3 { margin-top:20px; }.credibility-source { font-size:.88rem; }.credibility-notes-label { display:block; font-weight:600; font-size:.85rem; margin:10px 0 6px; }.credibility-card textarea { box-sizing:border-box; width:100%; resize:vertical; padding:10px; border:1px solid var(--border-light); border-radius:8px; background:var(--background); color:var(--text); }.credibility-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }.credibility-actions button:disabled { opacity:.5; cursor:not-allowed; }.credibility-actions .danger { color:#b42318; border-color:#e7aaa5; }.credibility-error { padding:12px; margin:12px 0; color:#b42318; background:#fee4e2; border-radius:8px; }.credibility-empty { text-align:center; padding:48px 20px; }.credibility-empty p { color:var(--text-secondary); }
+@media(max-width:650px) { .credibility-heading,.credibility-card-top { align-items:flex-start; flex-direction:column; } .admin-credibility-page { padding:28px 14px 60px; } }
+
+/* Moderation queue tabs and workflow status */
+.credibility-tabs { display:flex; gap:8px; border-bottom:1px solid var(--border-light); margin:0 0 20px; }
+.credibility-tabs button { display:flex; align-items:center; gap:9px; border:0; border-bottom:3px solid transparent; background:transparent; color:var(--text-secondary); padding:12px 14px 10px; cursor:pointer; font-weight:600; }
+.credibility-tabs button.active { color:var(--text); border-bottom-color:var(--accent,#287b68); }
+.credibility-tabs button span { display:inline-flex; min-width:22px; height:22px; align-items:center; justify-content:center; border-radius:999px; background:var(--surface-secondary); font-size:.75rem; }
+.moderation-status-badge { display:inline-block; margin-left:7px; border-radius:999px; padding:4px 9px; font-size:.75rem; font-weight:700; background:var(--surface-secondary); color:var(--text-secondary); }
+.moderation-status-badge.under_review { color:#175cd3; background:#eff8ff; }
+.moderation-status-badge.pending_review { color:#9a6700; background:#fff1c2; }
+@media(max-width:450px) { .credibility-tabs button { padding-left:7px; padding-right:7px; font-size:.85rem; } }

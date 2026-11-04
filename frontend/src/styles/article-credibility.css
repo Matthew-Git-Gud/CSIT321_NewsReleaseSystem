@@ -1,0 +1,20 @@
+.credibility-section { border: 1px solid var(--border-color, #d8dce3); border-radius: 10px; padding: 16px; }
+.credibility-heading-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.credibility-analyse-button { flex: 0 0 auto; border: 0; border-radius: 8px; padding: 10px 14px; background: #2457c5; color: #fff; font-weight: 600; cursor: pointer; }
+.credibility-analyse-button:disabled { opacity: .6; cursor: not-allowed; }
+.credibility-report { margin-top: 16px; padding: 14px; border-radius: 9px; background: var(--surface-secondary, rgba(127,127,127,.08)); }
+.credibility-report-topline, .credibility-claim-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.credibility-status { display: inline-block; flex: 0 0 auto; border-radius: 999px; padding: 4px 9px; font-size: 12px; font-weight: 650; background: #e8edf5; color: #334155; }
+.credibility-status-supported { background: #dcfce7; color: #166534; }
+.credibility-status-insufficient_evidence, .credibility-status-not_verified, .credibility-status-partially_supported { background: #fef3c7; color: #92400e; }
+.credibility-status-contradictory, .credibility-status-contradicted { background: #fee2e2; color: #991b1b; }
+.credibility-status-opinion_or_non_factual { background: #e0e7ff; color: #3730a3; }
+.credibility-claims, .credibility-sources-list { margin-top: 16px; }
+.credibility-claim { margin-top: 10px; padding: 12px; border: 1px solid var(--border-color, #d8dce3); border-radius: 8px; background: var(--surface-primary, #fff); }
+.credibility-claim p { margin: 8px 0; }
+.credibility-evidence-list, .credibility-sources-list ul { margin: 8px 0 0; padding-left: 20px; }
+.credibility-evidence-list li, .credibility-sources-list li { margin: 6px 0; overflow-wrap: anywhere; }
+.credibility-source-ok { color: #15803d; font-size: 13px; }
+.credibility-source-unavailable { color: #b45309; font-size: 13px; }
+.credibility-moderation-notice { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border-color, #d8dce3); font-size: 13px; color: var(--text-secondary, #64748b); }
+@media (max-width: 640px) { .credibility-heading-row, .credibility-report-topline, .credibility-claim-heading { flex-direction: column; align-items: stretch; } .credibility-analyse-button { width: 100%; } }

@@ -28,6 +28,17 @@ const findCreatedArticle = async (id) => {
   return rows[0] || null;
 };
 
+const findCredibilityArticle = async (articleId, authorId) => {
+  const [rows] = await pool.execute(
+    `SELECT article_id, title, content, status
+     FROM articles
+     WHERE article_id = ? AND author_id = ? AND status = 'published'
+     LIMIT 1`,
+    [articleId, authorId]
+  );
+  return rows[0] || null;
+};
+
 const findByAuthor = async (authorId) => {
   const [rows] = await pool.execute(
     `SELECT a.article_id, a.author_id, a.title, a.summary, a.status, a.featured_image_url,
@@ -174,7 +185,7 @@ const findRelated = async (articleId, limit = 5) => {
 };
 
 module.exports = {
-  findCategory, insertArticle, findCreatedArticle, findByAuthor,
+  findCategory, insertArticle, findCreatedArticle, findCredibilityArticle, findByAuthor,
   softDelete, findForEdit, update, findPublishedById, findPublished,
   findPersonalised, recordView, findRelated,
 };
