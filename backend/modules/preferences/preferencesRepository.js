@@ -36,6 +36,19 @@ const statement6 = (params, connection) => (connection || pool).query(
   params,
 );
 
+const getAccentColour = (params, connection) => (connection || pool).execute(
+  'SELECT accent_colour FROM user_preferences WHERE user_id = ?',
+  params,
+);
+
+const saveAccentColour = (params, connection) => (connection || pool).execute(
+  'UPDATE user_preferences SET accent_colour = ? WHERE user_id = ?',
+  params,
+);
+
 const getConnection = () => pool.getConnection();
 
-module.exports = { getConnection, statement1, statement2, statement3, statement4, statement5, statement6 };
+module.exports = {
+  getConnection, statement1, statement2, statement3, statement4, statement5,
+  statement6, getAccentColour, saveAccentColour,
+};

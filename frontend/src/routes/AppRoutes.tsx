@@ -27,6 +27,7 @@ import UserManagement from "../pages/UserManagement";
 import AdminEditArticle from "../pages/AdminEditArticle";
 import Friends from "../pages/Friends";
 import { ROLES } from "../constants/roles";
+import type { AccentColour } from "../constants/appearance";
 
 type Theme =
   | "light"
@@ -37,11 +38,18 @@ type AppRoutesProps = {
 
   onToggleTheme:
   () => void;
+
+  accentColour: AccentColour;
+
+  onAccentColourChange:
+  (accentColour: AccentColour) => void;
 };
 
 function AppRoutes({
   theme,
   onToggleTheme,
+  accentColour,
+  onAccentColourChange,
 }: AppRoutesProps) {
   return (
     <BrowserRouter>
@@ -168,9 +176,15 @@ function AppRoutes({
               <ProtectedRoute
                 allowedRoles={[
                   ROLES.REGISTERED,
+                  ROLES.ADMIN,
                 ]}
               >
-                <Preferences />
+                <Preferences
+                  accentColour={accentColour}
+                  onAccentColourChange={
+                    onAccentColourChange
+                  }
+                />
               </ProtectedRoute>
             }
           />

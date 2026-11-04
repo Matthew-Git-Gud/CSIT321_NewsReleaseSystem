@@ -76,6 +76,11 @@ function ArticleForm({
     setCategoryError,
   ] = useState("");
 
+  // The image generator needs enough article context to create a relevant cover.
+  const canGenerateCover = Boolean(
+    title.trim() && summary.trim() && content.trim() && categoryId,
+  );
+
   useEffect(() => {
     const loadCategories = async () => {
       try {
@@ -298,18 +303,24 @@ function ArticleForm({
 
 
       <section className="form-group cover-image-section" aria-labelledby="cover-image-heading">
-        <label id="cover-image-heading">Cover Image</label>
-        <p className="field-helper">Choose an image to represent your article on the homepage and article listings.</p>
+        <div className="cover-image-heading-row">
+          <div>
+            <label id="cover-image-heading">Cover Image</label>
+            <p className="field-helper">Choose an image to represent your article on the homepage and article listings.</p>
+          </div>
+          <span className="cover-image-format">16:9 works best</span>
+        </div>
 
         {generatedCoverDataUrl && (
           <div className="cover-image-preview">
             <img src={generatedCoverDataUrl} alt="AI-generated cover preview" />
+            <p className="cover-image-preview-label">AI cover preview</p>
             <div className="cover-image-actions">
-              <button type="button" disabled={coverAccepting || coverGenerating || loading} onClick={() => { void handleAcceptGeneratedCover(); }}>
+              <button className="cover-image-primary-button" type="button" disabled={coverAccepting || coverGenerating || loading} onClick={() => { void handleAcceptGeneratedCover(); }}>
                 {coverAccepting ? "Saving..." : "Accept generated image"}
               </button>
-              <button type="button" disabled={coverAccepting || coverGenerating || loading || coverGenerations >= 3} onClick={() => { void handleGenerateCover(); }}>Regenerate</button>
-              <button type="button" disabled={coverAccepting || coverGenerating || loading} onClick={() => setGeneratedCoverDataUrl("")}>Discard</button>
+              <button className="cover-image-secondary-button" type="button" disabled={coverAccepting || coverGenerating || loading || coverGenerations >= 3} onClick={() => { void handleGenerateCover(); }}>Regenerate</button>
+              <button className="cover-image-danger-button" type="button" disabled={coverAccepting || coverGenerating || loading} onClick={() => setGeneratedCoverDataUrl("")}>Discard</button>
             </div>
             <small className="field-helper">Style: {generatedCoverStyle === "photorealistic" ? "Photorealistic" : "Editorial illustration"}</small>
           </div>
@@ -319,14 +330,14 @@ function ArticleForm({
           <div className="cover-image-preview">
             <img src={featuredImageUrl} alt="Article cover preview" />
             <div className="cover-image-actions">
-              <label className="cover-image-upload-button">
+              <label className="cover-image-upload-button cover-image-secondary-button">
                 Replace image
                 <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" hidden disabled={coverUploading || loading} onChange={event => { void handleCoverUpload(event.target.files?.[0]); event.currentTarget.value = ""; }} />
               </label>
-              <button type="button" disabled={coverUploading || loading} onClick={() => setFeaturedImageUrl("")}>Remove</button>
+              <button className="cover-image-danger-button" type="button" disabled={coverUploading || loading} onClick={() => setFeaturedImageUrl("")}>Remove</button>
             </div>
             <div className="cover-image-actions">
-              <button type="button" disabled={coverGenerating || coverUploading || loading || coverGenerations >= 3} onClick={() => { void handleGenerateCover(); }}>
+              <button className="cover-image-ai-button" type="button" disabled={!canGenerateCover || coverGenerating || coverUploading || loading || coverGenerations >= 3} onClick={() => { void handleGenerateCover(); }}>
                 {coverGenerating ? "Generating..." : "Generate a new cover with AI"}
               </button>
             </div>
@@ -335,21 +346,26 @@ function ArticleForm({
           <div className="cover-image-empty">
             <span>No cover image selected</span>
             <div className="cover-image-actions">
-              <label className="cover-image-upload-button">
+              <label className="cover-image-upload-button cover-image-primary-button">
                 {coverUploading ? "Uploading..." : "Upload image"}
                 <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" hidden disabled={coverUploading || loading} onChange={event => { void handleCoverUpload(event.target.files?.[0]); event.currentTarget.value = ""; }} />
               </label>
-              <button type="button" disabled={coverGenerating || coverUploading || loading || coverGenerations >= 3} onClick={() => { void handleGenerateCover(); }}>
+              <button className="cover-image-ai-button" type="button" disabled={!canGenerateCover || coverGenerating || coverUploading || loading || coverGenerations >= 3} onClick={() => { void handleGenerateCover(); }}>
                 {coverGenerating ? "Generating..." : "Generate with AI"}
               </button>
             </div>
           </div>
         )}
-        {coverUploading && <p className="field-helper">Uploading cover image...</p>}
-        {coverGenerating && <p className="field-helper">Creating an image prompt and generating your cover. This may take a little while...</p>}
-        <small className="field-helper">AI generations used: {coverGenerations}/3 for this editing session.</small>
+        {!canGenerateCover && !generatedCoverDataUrl && (
+          <p className="cover-image-readiness">Add a title, summary, category and article content to unlock AI cover generation.</p>
+        )}
+        {coverUploading && <p className="field-helper" aria-live="polite">Uploading cover image...</p>}
+        {coverGenerating && <p className="field-helper" aria-live="polite">Creating an image prompt and generating your cover. This may take a little while...</p>}
+        <div className="cover-image-guidance">
+          <small className="field-helper">AI generations used: {coverGenerations}/3 for this editing session.</small>
+          <small className="field-helper">Recommended: landscape image, ideally 16:9. You can publish without a cover image.</small>
+        </div>
         {coverError && <p className="form-error">{coverError}</p>}
-        <small className="field-helper">Recommended: landscape image, ideally 16:9. You can publish without a cover image.</small>
       </section>
 
       <div className="form-group">

@@ -76,6 +76,9 @@ const sendLoginResponse = (user) => {
 
       role:
         user.role,
+
+      accent_colour:
+        user.accent_colour || "emerald",
     },
   });
 };

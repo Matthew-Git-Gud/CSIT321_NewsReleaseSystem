@@ -15,10 +15,24 @@ import {
 } from "../services/preferences";
 
 import { useAuth } from "../context/AuthContext";
+import {
+  ACCENT_COLOURS,
+  type AccentColour,
+} from "../constants/appearance";
 
 import "../styles/Preferences.css";
 
-function Preferences() {
+type PreferencesProps = {
+  accentColour: AccentColour;
+  onAccentColourChange: (
+    accentColour: AccentColour,
+  ) => void;
+};
+
+function Preferences({
+  accentColour,
+  onAccentColourChange,
+}: PreferencesProps) {
   const navigate = useNavigate();
 
   const { user } = useAuth();
@@ -32,6 +46,13 @@ function Preferences() {
     selectedCategoryIds,
     setSelectedCategoryIds,
   ] = useState<number[]>([]);
+
+  const [
+    selectedAccentColour,
+    setSelectedAccentColour,
+  ] = useState<AccentColour>(
+    accentColour,
+  );
 
   const [
     error,
@@ -76,10 +97,20 @@ function Preferences() {
           );
 
           setSelectedCategoryIds(
-            savedCategories.map(
+            savedCategories.preferences.map(
               (category) =>
                 category.category_id,
             ),
+          );
+
+          setSelectedAccentColour(
+            savedCategories.accentColour,
+          );
+
+          // Apply the saved choice as soon as it is known, not only after a
+          // second click. This also restores the theme on another device.
+          onAccentColourChange(
+            savedCategories.accentColour,
           );
         } catch (
           requestError
@@ -122,6 +153,21 @@ function Preferences() {
     );
   };
 
+  const selectAccentColour = (
+    nextAccentColour: AccentColour,
+  ) => {
+    setSuccess("");
+    setSelectedAccentColour(
+      nextAccentColour,
+    );
+
+    // Preview the colour immediately; saving below makes it follow the user
+    // to their next sign-in as well.
+    onAccentColourChange(
+      nextAccentColour,
+    );
+  };
+
   // =========================
   // SAVE PREFERENCES
   // =========================
@@ -136,6 +182,7 @@ function Preferences() {
         const response =
           await savePreferences(
             selectedCategoryIds,
+            selectedAccentColour,
           );
 
         setSuccess(
@@ -185,7 +232,7 @@ function Preferences() {
 
         {loading ? (
           <p className="preferences-status">
-            Loading topics...
+            Loading preferences...
           </p>
         ) : (
           <>
@@ -227,6 +274,76 @@ function Preferences() {
               )}
             </div>
 
+            <section
+              className="appearance-preferences"
+              aria-labelledby="appearance-title"
+            >
+              <div className="appearance-preferences-heading">
+                <p className="eyebrow">
+                  Appearance
+                </p>
+
+                <h2 id="appearance-title">
+                  Choose your accent colour.
+                </h2>
+
+                <p>
+                  Your choice updates buttons, links and highlights across the site.
+                </p>
+              </div>
+
+              <div
+                className="accent-colour-options"
+                role="radiogroup"
+                aria-label="Accent colour"
+              >
+                {ACCENT_COLOURS.map(
+                  (colour) => {
+                    const isSelected =
+                      selectedAccentColour === colour.id;
+
+                    return (
+                      <button
+                        key={colour.id}
+                        className={
+                          isSelected
+                            ? "accent-colour-option selected"
+                            : "accent-colour-option"
+                        }
+                        type="button"
+                        role="radio"
+                        aria-checked={isSelected}
+                        onClick={() =>
+                          selectAccentColour(
+                            colour.id,
+                          )
+                        }
+                      >
+                        <span
+                          className="accent-colour-swatch"
+                          style={{
+                            backgroundColor:
+                              colour.swatch,
+                          }}
+                          aria-hidden="true"
+                        />
+
+                        <span>
+                          <strong>
+                            {colour.label}
+                          </strong>
+
+                          <small>
+                            {colour.description}
+                          </small>
+                        </span>
+                      </button>
+                    );
+                  },
+                )}
+              </div>
+            </section>
+
             {error && (
               <p className="form-error">
                 {error}
@@ -248,7 +365,7 @@ function Preferences() {
               >
                 {saving
                   ? "Saving..."
-                  : "Save topics"}
+                  : "Save preferences"}
               </button>
 
               <button

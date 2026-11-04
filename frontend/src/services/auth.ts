@@ -1,8 +1,11 @@
+import type { AccentColour } from "../constants/appearance";
+
 export type User = {
   user_id: number
   username: string
   full_name: string
   role: 'registered' | 'admin'
+  accent_colour?: AccentColour
 }
 
 const API_URL = 'http://localhost:3000/api/auth'

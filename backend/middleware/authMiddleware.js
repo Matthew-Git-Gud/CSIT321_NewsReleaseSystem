@@ -26,13 +26,15 @@ const authenticate = async (
       await pool.query(
         `
         SELECT
-          user_id,
-          username,
-          full_name,
-          role,
-          status
-        FROM users
-        WHERE user_id = ?
+          u.user_id,
+          u.username,
+          u.full_name,
+          u.role,
+          u.status,
+          COALESCE(up.accent_colour, 'emerald') AS accent_colour
+        FROM users AS u
+        LEFT JOIN user_preferences AS up ON up.user_id = u.user_id
+        WHERE u.user_id = ?
         `,
         [decoded.user_id],
       );
@@ -99,13 +101,15 @@ const optionalAuthenticate = async (
       await pool.query(
         `
         SELECT
-          user_id,
-          username,
-          full_name,
-          role,
-          status
-        FROM users
-        WHERE user_id = ?
+          u.user_id,
+          u.username,
+          u.full_name,
+          u.role,
+          u.status,
+          COALESCE(up.accent_colour, 'emerald') AS accent_colour
+        FROM users AS u
+        LEFT JOIN user_preferences AS up ON up.user_id = u.user_id
+        WHERE u.user_id = ?
         LIMIT 1
         `,
         [decoded.user_id],
@@ -136,6 +140,7 @@ const optionalAuthenticate = async (
       username: user.username,
       full_name: user.full_name,
       role: user.role,
+      accent_colour: user.accent_colour,
     };
 
     return next();

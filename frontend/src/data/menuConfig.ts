@@ -85,5 +85,9 @@ export const menuByRole: Record<Role, MenuItem[]> = {
       label: "User Management",
       path: "/admin/users",
     },
+    {
+      label: "Preferences",
+      path: "/preferences",
+    },
   ],
 };

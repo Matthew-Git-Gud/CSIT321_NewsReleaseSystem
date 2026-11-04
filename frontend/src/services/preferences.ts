@@ -1,9 +1,20 @@
+import {
+  DEFAULT_ACCENT_COLOUR,
+  isAccentColour,
+  type AccentColour,
+} from "../constants/appearance";
+
 const API_URL =
   "http://localhost:3000/api/preferences";
 
 export type Category = {
   category_id: number;
   name: string;
+};
+
+export type SavedPreferences = {
+  preferences: Category[];
+  accentColour: AccentColour;
 };
 
 async function getResponseData(
@@ -42,7 +53,7 @@ export async function getCategories():
 }
 
 export async function getPreferences():
-  Promise<Category[]> {
+  Promise<SavedPreferences> {
   const response = await fetch(
     API_URL,
     {
@@ -53,11 +64,21 @@ export async function getPreferences():
   const data =
     await getResponseData(response);
 
-  return data.preferences;
+  return {
+    preferences: data.preferences,
+    // Older servers do not return an accent yet, so keep the page usable
+    // while a teammate is restarting their local backend.
+    accentColour: isAccentColour(
+      data.accentColour,
+    )
+      ? data.accentColour
+      : DEFAULT_ACCENT_COLOUR,
+  };
 }
 
 export async function savePreferences(
   categoryIds: number[],
+  accentColour: AccentColour,
 ) {
   const response = await fetch(
     API_URL,
@@ -73,6 +94,7 @@ export async function savePreferences(
 
       body: JSON.stringify({
         categoryIds,
+        accentColour,
       }),
     },
   );

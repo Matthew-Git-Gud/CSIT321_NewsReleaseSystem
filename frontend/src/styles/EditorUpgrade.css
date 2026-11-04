@@ -7,8 +7,8 @@
 .editor-image-node.image-align-right { justify-content:flex-end; }
 .editor-image-frame { position:relative; max-width:100%; }
 .rich-text-editor .ProseMirror .editor-image-frame img { display:block; width:100%; max-width:100%; height:auto; margin:0; border-radius:6px; }
-.editor-image-frame.is-selected { outline:2px solid #2563eb; }
-.editor-image-resize { position:absolute; right:-9px; bottom:-9px; width:24px; height:24px; background:#2563eb; color:white; border:0; border-radius:5px; cursor:nwse-resize; touch-action:none; }
+.editor-image-frame.is-selected { outline:2px solid var(--primary); }
+.editor-image-resize { position:absolute; right:-9px; bottom:-9px; width:24px; height:24px; background:var(--primary); color:var(--on-primary); border:0; border-radius:5px; cursor:nwse-resize; touch-action:none; }
 .editor-image-tools { display:flex; flex-wrap:wrap; gap:10px; align-items:center; padding:10px; background:#f3f4f6; color:#111827; }
 .editor-image-tools label { display:flex; align-items:center; gap:6px; }
 /* Published article HTML and editor HTML share the same attributes. */

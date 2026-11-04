@@ -640,7 +640,7 @@
    ========================================================= */
 
 :root[data-theme="dark"] .admin-page .admin-welcome {
-  color: #b8c9c2;
+  color: var(--text-secondary);
 }
 
 :root[data-theme="dark"] .admin-page .system-status {
@@ -655,18 +655,18 @@
 /* Metrics */
 
 :root[data-theme="dark"] .admin-page .admin-metric {
-  background: #223832;
-  border-color: #466158;
+  background: var(--surface);
+  border-color: var(--border);
 
   box-shadow: none;
 }
 
 :root[data-theme="dark"] .admin-page .admin-metric strong {
-  color: #edf5f1;
+  color: var(--text);
 }
 
 :root[data-theme="dark"] .admin-page .admin-metric span {
-  color: #b8c9c2;
+  color: var(--text-secondary);
 }
 
 :root[data-theme="dark"]
@@ -694,8 +694,8 @@
 /* Management cards */
 
 :root[data-theme="dark"] .admin-page .admin-management {
-  background: #223832;
-  border-color: #466158;
+  background: var(--surface);
+  border-color: var(--border);
 
   box-shadow: none;
 }
@@ -703,14 +703,14 @@
 :root[data-theme="dark"]
   .admin-page
   .admin-management-heading {
-  border-color: #466158;
+  border-color: var(--border);
 }
 
 :root[data-theme="dark"]
   .admin-page
   .admin-management-heading
   h2 {
-  color: #edf5f1;
+  color: var(--text);
 }
 
 
@@ -724,17 +724,17 @@
   .admin-page
   .admin-filters
   select {
-  color: #edf5f1;
-  background: #193029;
+  color: var(--text);
+  background: var(--surface-soft);
 
-  border-color: #466158;
+  border-color: var(--border);
 }
 
 :root[data-theme="dark"]
   .admin-page
   .admin-filters
   input::placeholder {
-  color: #849b92;
+  color: var(--text-muted);
 }
 
 :root[data-theme="dark"]
@@ -745,10 +745,10 @@
   .admin-page
   .admin-filters
   select:focus {
-  border-color: #70aa96;
+  border-color: var(--primary);
 
   box-shadow:
-    0 0 0 3px rgba(112, 170, 150, 0.1);
+    0 0 0 3px color-mix(in srgb, var(--primary) 14%, transparent);
 }
 
 
@@ -758,19 +758,19 @@
   .admin-page
   .admin-table-wrap
   th {
-  color: #b8c9c2;
-  background: #1a2d27;
+  color: var(--text-secondary);
+  background: var(--surface-soft);
 
-  border-color: #385149;
+  border-color: var(--border-light);
 }
 
 :root[data-theme="dark"]
   .admin-page
   .admin-table-wrap
   td {
-  color: #b8c9c2;
+  color: var(--text-secondary);
 
-  border-color: #385149;
+  border-color: var(--border-light);
 }
 
 :root[data-theme="dark"]
@@ -778,7 +778,7 @@
   .admin-table-wrap
   tbody
   tr:hover {
-  background: #29443c;
+  background: color-mix(in srgb, var(--primary-soft) 56%, var(--surface));
 }
 
 :root[data-theme="dark"]
@@ -786,7 +786,7 @@
   .admin-management:first-of-type
   .admin-table-wrap
   td:nth-child(2) {
-  color: #edf5f1;
+  color: var(--text);
 }
 
 :root[data-theme="dark"]
@@ -794,7 +794,7 @@
   .admin-table-wrap
   td
   strong {
-  color: #edf5f1;
+  color: var(--text);
 }
 
 :root[data-theme="dark"]
@@ -802,7 +802,7 @@
   .admin-table-wrap
   td
   small {
-  color: #9fb2aa;
+  color: var(--text-muted);
 }
 
 :root[data-theme="dark"]
@@ -810,7 +810,7 @@
   .admin-table-wrap
   td
   a {
-  color: #8bc8b2;
+  color: var(--primary);
 }
 
 
@@ -819,10 +819,10 @@
 :root[data-theme="dark"]
   .admin-page
   .status-badge.published {
-  color: #9ed3bf;
-  background: #214237;
+  color: var(--success);
+  background: var(--success-bg);
 
-  border-color: #3d6758;
+  border-color: var(--success-border);
 }
 
 :root[data-theme="dark"]
@@ -853,20 +853,20 @@
   .admin-page
   .admin-actions
   button {
-  color: #8bc8b2;
+  color: var(--primary);
   background: transparent;
 
-  border-color: #48675d;
+  border-color: color-mix(in srgb, var(--primary) 48%, var(--border));
 }
 
 :root[data-theme="dark"]
   .admin-page
   .admin-actions
   button:hover:not(:disabled) {
-  color: #b4dfcf;
-  background: #29473e;
+  color: var(--primary-hover);
+  background: color-mix(in srgb, var(--primary-soft) 62%, var(--surface));
 
-  border-color: #66877b;
+  border-color: var(--primary);
 }
 
 
@@ -917,7 +917,7 @@
 :root[data-theme="dark"]
   .admin-page
   td.admin-empty {
-  color: #b8c9c2 !important;
+  color: var(--text-secondary) !important;
 }
 
 
@@ -941,7 +941,7 @@
 :root[data-theme="dark"]
   .admin-page
   .admin-table-wrap::-webkit-scrollbar-thumb {
-  background: #536c63;
+  background: var(--border);
 }
 
 

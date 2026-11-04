@@ -1,20 +1,89 @@
+/* The browser-based listener is presented as a compact article utility bar. */
 .article-audio-controls {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 0.65rem;
-  margin: 1rem 0;
+  margin: 1.25rem 0;
+  padding: 10px;
+  background: color-mix(in srgb, var(--primary-soft) 28%, var(--surface));
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
 }
+
 .article-audio-controls button,
 .article-audio-controls select {
   min-height: 2.5rem;
   padding: 0.45rem 0.75rem;
-  border: 1px solid var(--border-color, #cbd5e1);
+  border: 1px solid var(--border);
   border-radius: 0.5rem;
-  background: var(--surface-color, #fff);
-  color: inherit;
+  color: var(--text);
+  background: var(--surface);
   font: inherit;
+  transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
 }
-.article-audio-controls button { cursor: pointer; }
-.article-audio-controls label { display: flex; align-items: center; gap: 0.4rem; }
-.article-audio-status { font-size: 0.9rem; }
+
+.article-audio-controls button {
+  cursor: pointer;
+  font-size: 0.84rem;
+  font-weight: 750;
+}
+
+.article-audio-controls button:hover {
+  transform: translateY(-1px);
+}
+
+.article-audio-primary {
+  color: var(--on-primary) !important;
+  background: var(--primary) !important;
+  border-color: var(--primary) !important;
+}
+
+.article-audio-primary:hover {
+  background: var(--primary-hover) !important;
+}
+
+.article-audio-stop {
+  color: var(--danger) !important;
+  border-color: var(--danger-border) !important;
+}
+
+.article-audio-stop:hover {
+  background: var(--danger-bg) !important;
+}
+
+.article-audio-speed {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.article-audio-controls select {
+  min-width: 5.6rem;
+  color: var(--text);
+  background: var(--surface);
+}
+
+.article-audio-controls select:focus {
+  outline: 2px solid color-mix(in srgb, var(--primary) 18%, transparent);
+  border-color: var(--primary);
+}
+
+.article-audio-status {
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+}
+
+@media (max-width: 560px) {
+  .article-audio-controls {
+    align-items: stretch;
+  }
+
+  .article-audio-controls > button,
+  .article-audio-speed {
+    flex: 1 1 auto;
+  }
+}

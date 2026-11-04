@@ -106,14 +106,14 @@ export default function ArticleAudioControls({ title, summary, contentHtml }: Pr
   return (
     <div className="article-audio-controls" aria-label="Listen to this article">
       {state === "idle" || state === "error" ? (
-        <button type="button" onClick={play}>Listen to article</button>
+        <button className="article-audio-primary" type="button" onClick={play}>Listen to article</button>
       ) : (
         <>
-          <button type="button" onClick={pauseOrResume}>{state === "paused" ? "Resume" : "Pause"}</button>
-          <button type="button" onClick={stop}>Stop</button>
+          <button className="article-audio-primary" type="button" onClick={pauseOrResume}>{state === "paused" ? "Resume" : "Pause"}</button>
+          <button className="article-audio-stop" type="button" onClick={stop}>Stop</button>
         </>
       )}
-      <label>Speed
+      <label className="article-audio-speed">Speed
         <select value={rate} onChange={event => setRate(Number(event.target.value))} aria-label="Speech speed">
           <option value={0.75}>0.75×</option><option value={1}>1×</option>
           <option value={1.25}>1.25×</option><option value={1.5}>1.5×</option>

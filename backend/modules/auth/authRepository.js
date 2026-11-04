@@ -27,9 +27,10 @@ const statement2 = (params, connection) => (connection || pool).execute(
 
 const statement3 = (params, connection) => (connection || pool).execute(
   `
-        SELECT *
-        FROM users
-        WHERE email = ?
+        SELECT u.*, COALESCE(up.accent_colour, 'emerald') AS accent_colour
+        FROM users AS u
+        LEFT JOIN user_preferences AS up ON up.user_id = u.user_id
+        WHERE u.email = ?
         LIMIT 1
         `,
   params,
@@ -37,9 +38,10 @@ const statement3 = (params, connection) => (connection || pool).execute(
 
 const statement4 = (params, connection) => (connection || pool).execute(
   `
-        SELECT *
-        FROM users
-        WHERE email = ?
+        SELECT u.*, COALESCE(up.accent_colour, 'emerald') AS accent_colour
+        FROM users AS u
+        LEFT JOIN user_preferences AS up ON up.user_id = u.user_id
+        WHERE u.email = ?
         LIMIT 1
         `,
   params,
