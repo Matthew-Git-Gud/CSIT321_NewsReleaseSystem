@@ -1,3 +1,4 @@
+import "../styles/cover-image.css";
 import {
   type FormEvent,
   useEffect,
@@ -944,6 +945,16 @@ function ArticleView() {
             <span aria-hidden="true">/</span>
             <span>{article.category}</span>
           </nav>
+
+          {article.featured_image_url && (
+            <figure className="article-featured-image">
+              <img
+                src={article.featured_image_url}
+                alt={`Cover image for ${article.title}`}
+                loading="eager"
+              />
+            </figure>
+          )}
 
           <div className="article-category-row">
             <Link

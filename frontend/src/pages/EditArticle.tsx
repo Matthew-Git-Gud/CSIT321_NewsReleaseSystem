@@ -139,6 +139,7 @@ function EditArticle() {
         title: article.title,
         summary: article.summary,
         content: article.content,
+        featured_image_url: article.featured_image_url ?? null,
         category_id: article.category_id,
 
         status:

@@ -10,9 +10,9 @@ const findCategory = async (categoryId) => {
 
 const insertArticle = async (data) => {
   const [result] = await pool.execute(
-    `INSERT INTO articles (author_id, category_id, title, summary, content, status)
-     VALUES (?, ?, ?, ?, ?, ?)`,
-    [data.authorId, data.category_id, data.title, data.summary, data.content, data.status]
+    `INSERT INTO articles (author_id, category_id, title, summary, content, featured_image_url, status)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    [data.authorId, data.category_id, data.title, data.summary, data.content, data.featured_image_url || null, data.status]
   );
   return result.insertId;
 };
@@ -20,7 +20,7 @@ const insertArticle = async (data) => {
 const findCreatedArticle = async (id) => {
   const [rows] = await pool.execute(
     `SELECT a.article_id, a.author_id, a.title, a.summary, a.content,
-            a.status, a.created_at, a.updated_at, c.category_id,
+            a.status, a.featured_image_url, a.created_at, a.updated_at, c.category_id,
             c.name AS category
      FROM articles a JOIN categories c ON a.category_id = c.category_id
      WHERE a.article_id = ?`, [id]
@@ -30,7 +30,7 @@ const findCreatedArticle = async (id) => {
 
 const findByAuthor = async (authorId) => {
   const [rows] = await pool.execute(
-    `SELECT a.article_id, a.author_id, a.title, a.summary, a.status,
+    `SELECT a.article_id, a.author_id, a.title, a.summary, a.status, a.featured_image_url,
             a.created_at, a.updated_at, c.category_id, c.name AS category
      FROM articles a JOIN categories c ON a.category_id = c.category_id
      WHERE a.author_id = ? AND a.status != 'deleted'
@@ -51,7 +51,7 @@ const softDelete = async (articleId, authorId) => {
 const findForEdit = async (articleId, authorId) => {
   const [rows] = await pool.execute(
     `SELECT a.article_id, a.author_id, a.category_id, a.title,
-            a.summary, a.content, a.status, a.created_at, a.updated_at,
+            a.summary, a.content, a.status, a.featured_image_url, a.created_at, a.updated_at,
             c.name AS category
      FROM articles a JOIN categories c ON a.category_id = c.category_id
      WHERE a.article_id = ? AND a.author_id = ? AND a.status != 'deleted'`,
@@ -63,9 +63,9 @@ const findForEdit = async (articleId, authorId) => {
 const update = async (articleId, authorId, data) => {
   const [result] = await pool.execute(
     `UPDATE articles
-     SET title = ?, summary = ?, content = ?, category_id = ?, status = ?
+     SET title = ?, summary = ?, content = ?, featured_image_url = ?, category_id = ?, status = ?
      WHERE article_id = ? AND author_id = ? AND status != 'deleted'`,
-    [data.title, data.summary, data.content, data.category_id, data.status, articleId, authorId]
+    [data.title, data.summary, data.content, data.featured_image_url || null, data.category_id, data.status, articleId, authorId]
   );
   return result.affectedRows;
 };
@@ -73,7 +73,7 @@ const update = async (articleId, authorId, data) => {
 const findPublishedById = async (articleId) => {
   const [rows] = await pool.execute(
     `SELECT a.article_id, a.author_id, a.category_id, a.title, a.summary,
-            a.content, a.status, a.view_count, a.created_at, a.updated_at,
+            a.content, a.status, a.featured_image_url, a.view_count, a.created_at, a.updated_at,
             c.name AS category, u.username AS author_username,
             u.full_name AS author_name
      FROM articles a
@@ -87,7 +87,7 @@ const findPublishedById = async (articleId) => {
 const findPublished = async () => {
   const [rows] = await pool.execute(
     `SELECT a.article_id, a.author_id, a.category_id, a.title, a.summary,
-            a.content, a.created_at, a.updated_at, c.name AS category,
+            a.content, a.featured_image_url, a.created_at, a.updated_at, c.name AS category,
             u.username AS author_username, u.full_name AS author_name
      FROM articles a
      JOIN categories c ON a.category_id = c.category_id
@@ -99,7 +99,7 @@ const findPublished = async () => {
 
 const findPersonalised = async (userId) => {
   const [rows] = await pool.query(
-    `SELECT a.article_id, a.title, a.summary, a.content, a.status,
+    `SELECT a.article_id, a.title, a.summary, a.content, a.featured_image_url, a.status,
             a.created_at, a.updated_at, c.category_id, c.name AS category,
             u.username AS author, u.full_name AS author_name
      FROM articles a
@@ -157,7 +157,7 @@ const recordView = async (articleId, sessionId) => {
 const findRelated = async (articleId, limit = 5) => {
   const [rows] = await pool.execute(
     `SELECT a.article_id, a.author_id, a.category_id, a.title, a.summary,
-            a.created_at, a.updated_at, c.name AS category,
+            a.featured_image_url, a.created_at, a.updated_at, c.name AS category,
             u.username AS author_username, u.full_name AS author_name
      FROM articles source
      JOIN articles a ON a.article_id <> source.article_id

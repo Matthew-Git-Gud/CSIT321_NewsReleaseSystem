@@ -1,0 +1,12 @@
+
+/* Article cover image field */
+.cover-image-section { display: flex; flex-direction: column; gap: 0.65rem; }
+.cover-image-empty { min-height: 150px; border: 1px dashed var(--border-color, #9ca3af); border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; padding: 1.25rem; color: var(--text-secondary, #6b7280); }
+.cover-image-preview { border: 1px solid var(--border-color, #d1d5db); border-radius: 12px; overflow: hidden; }
+.cover-image-preview img { display: block; width: 100%; max-height: 360px; aspect-ratio: 16 / 9; object-fit: cover; }
+.cover-image-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; padding: 0.85rem; }
+.cover-image-upload-button { display: inline-flex; align-items: center; justify-content: center; padding: 0.65rem 1rem; border-radius: 8px; background: var(--button-bg, #2563eb); color: white; cursor: pointer; font-weight: 600; }
+.cover-image-actions button { padding: 0.65rem 1rem; border-radius: 8px; }
+
+.article-featured-image { margin: 1.25rem 0 1.5rem; overflow: hidden; border-radius: 14px; }
+.article-featured-image img { display: block; width: 100%; max-height: 520px; aspect-ratio: 16 / 9; object-fit: cover; }

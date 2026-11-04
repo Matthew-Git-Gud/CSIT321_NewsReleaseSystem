@@ -24,7 +24,7 @@ const createArticle = async (body, authorId) => {
   const id = await repository.insertArticle({
     authorId, category_id: body.category_id,
     title: body.title.trim(), summary: body.summary.trim(),
-    content: body.content.trim(), status,
+    content: body.content.trim(), featured_image_url: body.featured_image_url || null, status,
   });
   const article = await repository.findCreatedArticle(id);
   return {
@@ -57,7 +57,7 @@ const updateArticle = async (articleId, authorId, body) => {
   }
   const affected = await repository.update(articleId, authorId, {
     title: body.title.trim(), summary: body.summary.trim(),
-    content: body.content.trim(), category_id: body.category_id,
+    content: body.content.trim(), featured_image_url: body.featured_image_url || null, category_id: body.category_id,
     status: body.status,
   });
   if (!affected) throw new ArticleError(404, 'Article not found');
@@ -70,7 +70,30 @@ const getArticleById = async articleId => {
   return { article };
 };
 
-const getPublishedArticles = async () => ({ articles: await repository.findPublished() });
+// Only expose a safe, lightweight cover URL to listing pages. The full article
+// content remains available from the individual article endpoint instead.
+const getCoverImageUrl = content => {
+  if (typeof content !== 'string') return null;
+
+  const imageMatch = content.match(/<img\b[^>]*\bsrc\s*=\s*["']([^"']+)["']/i);
+  if (!imageMatch) return null;
+
+  const source = imageMatch[1].trim();
+
+  // Article media may be local project assets, uploaded media, or a normal HTTP(S) URL.
+  return /^(https?:\/\/|\/api\/media\/|\/article-covers\/)/i.test(source) ? source : null;
+};
+
+const getPublishedArticles = async () => {
+  const articles = await repository.findPublished();
+
+  return {
+    articles: articles.map(({ content, ...article }) => ({
+      ...article,
+      cover_image_url: article.featured_image_url || getCoverImageUrl(content),
+    })),
+  };
+};
 const getPersonalisedFeed = async userId => ({ articles: await repository.findPersonalised(userId) });
 
 const recordArticleView = async (rawId, sessionId) => {

@@ -108,7 +108,7 @@ const {
 
 const { shareArticle: shareArticleWithUser, sharedWithMe } = require('../modules/shares/shareController')
 
-const { summarizeArticle: summarizeArticleWithAi, getArticleSummary: getArticleAiSummary, } = require('../modules/ai/aiController');
+const { summarizeArticle: summarizeArticleWithAi, getArticleSummary: getArticleAiSummary, generateCoverImagePrompt, generateCoverImage } = require('../modules/ai/aiController');
 
 const router = express.Router()
 
@@ -181,6 +181,9 @@ router.get(
 // Sharing routes (static path before the dynamic article route)
 router.get('/articles/shared-with-me', authenticate, sharedWithMe);
 router.post('/articles/:id/share', authenticate, shareArticleWithUser);
+
+router.post('/ai/cover-image/prompt', authenticate, generateCoverImagePrompt);
+router.post('/ai/cover-image/generate', authenticate, generateCoverImage);
 
 router.get('/articles/:id/summary', getArticleAiSummary);
 router.post('/articles/:id/summarize', authenticate, summarizeArticleWithAi);

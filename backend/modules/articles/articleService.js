@@ -24,7 +24,7 @@ const createArticle = async (body, authorId) => {
   const id = await repository.insertArticle({
     authorId, category_id: body.category_id,
     title: body.title.trim(), summary: body.summary.trim(),
-    content: body.content.trim(), status,
+    content: body.content.trim(), featured_image_url: body.featured_image_url || null, status,
   });
   const article = await repository.findCreatedArticle(id);
   return {
@@ -57,7 +57,7 @@ const updateArticle = async (articleId, authorId, body) => {
   }
   const affected = await repository.update(articleId, authorId, {
     title: body.title.trim(), summary: body.summary.trim(),
-    content: body.content.trim(), category_id: body.category_id,
+    content: body.content.trim(), featured_image_url: body.featured_image_url || null, category_id: body.category_id,
     status: body.status,
   });
   if (!affected) throw new ArticleError(404, 'Article not found');
@@ -90,7 +90,7 @@ const getPublishedArticles = async () => {
   return {
     articles: articles.map(({ content, ...article }) => ({
       ...article,
-      cover_image_url: getCoverImageUrl(content),
+      cover_image_url: article.featured_image_url || getCoverImageUrl(content),
     })),
   };
 };

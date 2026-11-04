@@ -15,6 +15,7 @@ export type ArticleFormData = {
   content: string;
   category_id: number;
   status: CreateArticleStatus;
+  featured_image_url?: string | null;
 };
 
 export type ArticlePreview = {
@@ -29,8 +30,9 @@ export type ArticlePreview = {
   author_name: string;
   author_username: string;
 
-  // Optional first image from the article body, used only as a listing cover.
+  // Dedicated article cover image; legacy body-image fallback remains supported.
   cover_image_url?: string | null;
+  featured_image_url?: string | null;
 
   created_at: string;
   updated_at: string;
@@ -55,6 +57,7 @@ export type Article = {
 
   author_name?: string;
   author_username?: string;
+  featured_image_url?: string | null;
 };
 
 async function getResponseData(
