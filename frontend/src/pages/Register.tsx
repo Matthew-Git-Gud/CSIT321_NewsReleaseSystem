@@ -14,6 +14,13 @@ type RegisterProps = {
   onToggleTheme: () => void;
 };
 
+const passwordRules = [
+  { label: "At least 8 characters", matches: (value: string) => value.length >= 8 },
+  { label: "One lowercase letter", matches: (value: string) => /[a-z]/.test(value) },
+  { label: "One uppercase letter", matches: (value: string) => /[A-Z]/.test(value) },
+  { label: "One special character (for example !, @ or #)", matches: (value: string) => /[^A-Za-z0-9\s]/.test(value) },
+];
+
 function Register({
   theme,
   onToggleTheme,
@@ -22,6 +29,7 @@ function Register({
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [passwordTouched, setPasswordTouched] = useState(false);
   const [confirmPassword, setConfirmPassword] =
     useState("");
 
@@ -29,6 +37,7 @@ function Register({
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
+  const passwordMeetsAllRules = passwordRules.every((rule) => rule.matches(password));
 
   const handleSubmit = async (
     event: FormEvent<HTMLFormElement>,
@@ -36,6 +45,12 @@ function Register({
     event.preventDefault();
 
     setError("");
+
+    if (!passwordMeetsAllRules) {
+      setPasswordTouched(true);
+      setError("Please meet all password requirements before creating your account.");
+      return;
+    }
 
     if (password !== confirmPassword) {
       setError("Passwords do not match");
@@ -165,13 +180,33 @@ function Register({
             id="register-password"
             type="password"
             value={password}
-            onChange={(event) =>
-              setPassword(event.target.value)
-            }
+            onChange={(event) => {
+              setPassword(event.target.value);
+              setPasswordTouched(true);
+            }}
             placeholder="Create a password"
             autoComplete="new-password"
+            minLength={8}
+            aria-describedby="password-requirements"
+            aria-invalid={passwordTouched && !passwordMeetsAllRules}
             required
           />
+
+          {/* Immediate feedback makes the policy clear without revealing the password. */}
+          <ul id="password-requirements" className="password-requirements">
+            {passwordRules.map((rule) => {
+              const passed = rule.matches(password);
+              return (
+                <li
+                  className={passwordTouched && passed ? "is-met" : ""}
+                  key={rule.label}
+                >
+                  <span aria-hidden="true">{passwordTouched && passed ? "✓" : "○"}</span>
+                  {rule.label}
+                </li>
+              );
+            })}
+          </ul>
 
           <label htmlFor="register-confirm-password">
             Confirm password

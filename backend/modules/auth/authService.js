@@ -3,6 +3,20 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const repository = require("./authRepository");
 
+// Keep password validation on the server so registrations made outside the
+// website (for example, by calling the API directly) follow the same policy.
+const PASSWORD_POLICY_MESSAGE =
+  "Password must be at least 8 characters and include an uppercase letter, lowercase letter, and special character.";
+
+function meetsPasswordPolicy(password) {
+  return typeof password === "string"
+    && password.length >= 8
+    && /[a-z]/.test(password)
+    && /[A-Z]/.test(password)
+    // A special character is a non-letter, non-number and non-space symbol.
+    && /[^A-Za-z0-9\s]/.test(password);
+}
+
 // =========================
 // CREATE NORMAL LOGIN TOKEN
 // =========================
@@ -108,6 +122,12 @@ const register = async (
           message:
             "All fields are required",
         });
+    }
+
+    if (!meetsPasswordPolicy(password)) {
+      return outcome('INVALID', {
+        message: PASSWORD_POLICY_MESSAGE,
+      });
     }
 
     const [existingUsers] =
