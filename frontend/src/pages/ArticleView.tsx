@@ -49,6 +49,7 @@ import { ROLES } from "../constants/roles";
 import DOMPurify from "dompurify";
 import ShareArticleModal from "../components/ShareArticleModal";
 import AiSummaryPanel from "../components/AiSummaryPanel";
+import ReaderCredibilityPanel from "../components/ReaderCredibilityPanel";
 import ArticleAudioControls from "../components/ArticleAudioControls";
 import "../styles/ArticleMedia.css";
 import "../styles/RelatedArticles.css";
@@ -1246,6 +1247,12 @@ function ArticleView() {
         ========================= */}
         <AiSummaryPanel
           key={article.article_id}
+          articleId={article.article_id}
+          canGenerate={Boolean(user)}
+        />
+
+        <ReaderCredibilityPanel
+          key={`credibility-${article.article_id}`}
           articleId={article.article_id}
           canGenerate={Boolean(user)}
         />

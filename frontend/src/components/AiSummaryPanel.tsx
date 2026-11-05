@@ -20,23 +20,41 @@ export default function AiSummaryPanel({ articleId, canGenerate }: Props) {
     setGenerating(false);
     setError('');
     setCollapsed(false);
+
     getAiSummary(articleId, controller.signal)
-      .then(data => { if (!controller.signal.aborted) setSummary(data.summary); })
-      .catch(err => { if (!controller.signal.aborted) setError(err instanceof Error ? err.message : 'Unable to load summary'); })
-      .finally(() => { if (!controller.signal.aborted) setLoading(false); });
+      .then(data => {
+        if (!controller.signal.aborted) setSummary(data.summary);
+      })
+      .catch(err => {
+        if (!controller.signal.aborted) {
+          setError(err instanceof Error ? err.message : 'Unable to load summary');
+        }
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false);
+      });
+
     return () => controller.abort();
   }, [articleId]);
 
   async function handleGenerate(force: boolean) {
-    if (generating || (force && !canGenerate)) return;
+    // Both initial generation and regeneration require a signed-in user.
+    if (!canGenerate || generating) return;
+
     const id = requestId.current;
     setGenerating(true);
     setError('');
+
     try {
       const result = await generateAiSummary(articleId, force);
-      if (id === requestId.current) { setSummary(result.summary); setCollapsed(false); }
+      if (id === requestId.current) {
+        setSummary(result.summary);
+        setCollapsed(false);
+      }
     } catch (err) {
-      if (id === requestId.current) setError(err instanceof Error ? err.message : 'Unable to generate summary');
+      if (id === requestId.current) {
+        setError(err instanceof Error ? err.message : 'Unable to generate summary');
+      }
     } finally {
       if (id === requestId.current) setGenerating(false);
     }
@@ -44,7 +62,7 @@ export default function AiSummaryPanel({ articleId, canGenerate }: Props) {
 
   return (
     <section
-      className={`ai-summary-panel ${summary ? "has-summary" : "is-empty"}`}
+      className={`ai-summary-panel ${summary ? 'has-summary' : 'is-empty'}`}
       aria-label="AI article summary"
     >
       <div className="ai-summary-heading">
@@ -63,7 +81,7 @@ export default function AiSummaryPanel({ articleId, canGenerate }: Props) {
             onClick={() => setCollapsed(value => !value)}
             aria-expanded={!collapsed}
           >
-            {collapsed ? "Show" : "Hide"}
+            {collapsed ? 'Show' : 'Hide'}
           </button>
         )}
       </div>
@@ -84,27 +102,32 @@ export default function AiSummaryPanel({ articleId, canGenerate }: Props) {
           {!summary && (
             <div className="ai-summary-empty">
               <p>No quick summary has been created for this article yet.</p>
-              <span>You can generate a summary without signing in.</span>
+              {canGenerate
+                ? <span>Generate an AI summary to get a quick overview of this article.</span>
+                : <span>Sign in to access AI article summaries.</span>}
             </div>
           )}
 
-          {(!summary || canGenerate) && (
+          {canGenerate && (
             <button
               type="button"
               className="ai-summary-action"
               disabled={generating}
               onClick={() => handleGenerate(Boolean(summary))}
             >
-              <span aria-hidden="true">{generating ? "◌" : "✦"}</span>
+              <span aria-hidden="true">{generating ? '◌' : '✦'}</span>
               {generating
-                ? "Generating summary…"
+                ? 'Generating summary…'
                 : summary
-                  ? "Regenerate summary"
-                  : "Generate AI summary"}
+                  ? 'Regenerate summary'
+                  : 'Generate AI summary'}
             </button>
           )}
+
           {summary && !canGenerate && (
-            <p className="ai-summary-note">Sign in to regenerate this summary. Everyone can view the saved summary.</p>
+            <p className="ai-summary-note">
+              Sign in to regenerate this summary. Everyone can view the saved summary.
+            </p>
           )}
         </>
       )}

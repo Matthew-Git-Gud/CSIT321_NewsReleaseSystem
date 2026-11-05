@@ -111,6 +111,7 @@ const { shareArticle: shareArticleWithUser, sharedWithMe } = require('../modules
 const { summarizeArticle: summarizeArticleWithAi, getArticleSummary: getArticleAiSummary, generateCoverImagePrompt, generateCoverImage,retrieveCredibilitySources, analyseArticleCredibility } = require('../modules/ai/aiController');
 
 const { listModerationQueue, updateModerationStatus } = require('../modules/admin-credibility/adminCredibilityController');
+const { getReaderCredibility, requestReaderCredibility } = require('../modules/ai/readerCredibilityController');
 
 const router = express.Router()
 
@@ -190,7 +191,9 @@ router.post('/ai/credibility/sources', authenticate, retrieveCredibilitySources)
 router.post('/ai/credibility/analyse', authenticate, analyseArticleCredibility);
 
 router.get('/articles/:id/summary', getArticleAiSummary);
-router.post('/articles/:id/summarize', summarizeArticleWithAi);
+router.get('/articles/:articleId/credibility', getReaderCredibility);
+router.post('/articles/:articleId/credibility', authenticate, requestReaderCredibility);
+router.post('/articles/:id/summarize', authenticate, summarizeArticleWithAi);
 
 router.get(
   "/articles/:id",
