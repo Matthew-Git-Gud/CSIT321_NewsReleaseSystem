@@ -358,10 +358,11 @@ function Login({
 
         {appealToken &&
           !showAppealForm && (
-            <div className="appeal-prompt">
+            <section className="appeal-prompt" aria-labelledby="appeal-prompt-title">
+              <span className="appeal-kicker">Account status</span>
+              <h2 id="appeal-prompt-title">Your account is suspended</h2>
               <p>
-                Your account is
-                currently suspended.
+                You can ask an administrator to review this decision.
               </p>
 
               <button
@@ -379,7 +380,7 @@ function Login({
               >
                 Appeal Suspension
               </button>
-            </div>
+            </section>
           )}
 
         {/* =========================
@@ -394,23 +395,20 @@ function Login({
                 handleAppealSubmit
               }
             >
-              <h2>
-                Suspension Appeal
-              </h2>
+              <div className="appeal-heading">
+                <span className="appeal-kicker">Account review</span>
+                <h2>Request a suspension review</h2>
+                <p>
+                  Explain why you believe the suspension should be reviewed.
+                  Your appeal will be sent to an administrator.
+                </p>
+              </div>
 
-              <p>
-                Explain why you
-                believe your account
-                suspension should be
-                reviewed.
-              </p>
-
-              <div className="form-group">
-                <label
-                  htmlFor="appeal-reason"
-                >
-                  Appeal reason
-                </label>
+              <div className="appeal-reason-group">
+                <div className="appeal-label-row">
+                  <label htmlFor="appeal-reason">Appeal reason</label>
+                  <span aria-live="polite">{appealReason.length}/2000</span>
+                </div>
 
                 <textarea
                   id="appeal-reason"
@@ -428,29 +426,28 @@ function Login({
                   placeholder="Explain your appeal..."
                   rows={6}
                   maxLength={2000}
+                  aria-describedby="appeal-guidance"
                   disabled={
                     appealLoading
                   }
                   required
                 />
 
-                <small>
-                  {
-                    appealReason.length
-                  }
-                  /2000
+                <small id="appeal-guidance">
+                  Please include enough detail for the administrator to understand your request.
                 </small>
               </div>
 
               {appealError && (
-                <p className="form-error">
+                <p className="form-error" role="alert">
                   {appealError}
                 </p>
               )}
 
-              <div className="report-form-actions">
+              <div className="appeal-form-actions">
                 <button
                   type="button"
+                  className="appeal-cancel-button"
                   disabled={
                     appealLoading
                   }

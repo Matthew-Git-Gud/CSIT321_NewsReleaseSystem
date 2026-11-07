@@ -1,6 +1,7 @@
 import {
   Link,
   NavLink,
+  useNavigate,
 } from "react-router-dom";
 
 import ThemeToggle from "./ThemeToggle";
@@ -19,11 +20,13 @@ import "../styles/NavBar.css";
 type NavbarProps = {
   theme: "light" | "dark";
   onToggleTheme: () => void;
+  onSignedOut: () => void;
 };
 
 function NavBar({
   theme,
   onToggleTheme,
+  onSignedOut,
 }: NavbarProps) {
   const {
     user,
@@ -33,6 +36,7 @@ function NavBar({
 
   const menuItems =
     menuByRole[role];
+  const navigate = useNavigate();
 
   const handleSignOut =
     async () => {
@@ -43,6 +47,11 @@ function NavBar({
           "Unable to sign out:",
           error,
         );
+      } finally {
+        // The local session is cleared even if the logout request fails, so
+        // always return to the public homepage with the default colour theme.
+        onSignedOut();
+        navigate("/", { replace: true });
       }
     };
 

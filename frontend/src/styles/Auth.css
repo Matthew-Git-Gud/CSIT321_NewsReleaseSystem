@@ -107,6 +107,142 @@
   width: 100%;
 }
 
+/* The appeal flow lives inside the sign-in card, so it needs its own compact
+   layout instead of inheriting the article-report form styles. */
+.appeal-prompt,
+.appeal-form {
+  border: 1px solid color-mix(in srgb, var(--danger) 28%, var(--border));
+  border-radius: 16px;
+  margin-top: 18px;
+  padding: 20px;
+}
+
+.appeal-prompt {
+  background: color-mix(in srgb, var(--danger-bg) 62%, var(--surface));
+}
+
+.appeal-form {
+  background: color-mix(in srgb, var(--surface-soft) 78%, var(--surface));
+}
+
+.appeal-kicker {
+  color: var(--danger);
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.appeal-prompt h2,
+.appeal-heading h2 {
+  color: var(--text);
+  font-size: 1.36rem;
+  letter-spacing: -0.035em;
+  line-height: 1.15;
+  margin: 7px 0 8px;
+}
+
+.appeal-prompt p,
+.appeal-heading p {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.appeal-prompt .primary-button {
+  margin-top: 15px;
+  width: 100%;
+}
+
+.appeal-heading {
+  border-bottom: 1px solid var(--border-light);
+  margin-bottom: 17px;
+  padding-bottom: 16px;
+}
+
+.appeal-reason-group {
+  display: grid;
+  gap: 8px;
+}
+
+.appeal-label-row {
+  align-items: baseline;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.appeal-label-row label {
+  color: var(--text);
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+.appeal-label-row span,
+.appeal-reason-group small {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
+.appeal-form textarea {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-sizing: border-box;
+  color: var(--text);
+  font: inherit;
+  line-height: 1.5;
+  min-height: 132px;
+  outline: none;
+  padding: 12px 13px;
+  resize: vertical;
+  width: 100%;
+}
+
+.appeal-form textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary) 14%, transparent);
+}
+
+.appeal-form-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 18px;
+}
+
+.appeal-form-actions button {
+  min-height: 40px;
+}
+
+.appeal-cancel-button {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text-secondary);
+  padding: 9px 14px;
+}
+
+.appeal-cancel-button:hover:not(:disabled) {
+  background: var(--surface);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.appeal-form-actions .primary-button {
+  border-radius: 10px;
+  padding: 9px 15px;
+}
+
+.appeal-form-actions button:disabled,
+.appeal-prompt button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
 /* Password guidance is neutral until the user starts typing, then each met rule
    uses the active colour so it works with every selected colour theme. */
 .password-requirements {

@@ -78,12 +78,19 @@ function App() {
     );
   };
 
+  // Colour preferences belong to signed-in accounts. Once an account signs
+  // out, restore the public site's original Evergreen appearance.
+  const resetGuestAccentColour = () => {
+    setAccentColour(DEFAULT_ACCENT_COLOUR);
+  };
+
   return (
     <AppRoutes
       theme={theme}
       onToggleTheme={toggleTheme}
       accentColour={accentColour}
       onAccentColourChange={setAccentColour}
+      onSignedOut={resetGuestAccentColour}
     />
   );
 }

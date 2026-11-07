@@ -44,6 +44,9 @@ type AppRoutesProps = {
 
   onAccentColourChange:
   (accentColour: AccentColour) => void;
+
+  onSignedOut:
+  () => void;
 };
 
 function AppRoutes({
@@ -51,6 +54,7 @@ function AppRoutes({
   onToggleTheme,
   accentColour,
   onAccentColourChange,
+  onSignedOut,
 }: AppRoutesProps) {
   return (
     <BrowserRouter>
@@ -67,6 +71,7 @@ function AppRoutes({
               onToggleTheme={
                 onToggleTheme
               }
+              onSignedOut={onSignedOut}
             />
           }
         >

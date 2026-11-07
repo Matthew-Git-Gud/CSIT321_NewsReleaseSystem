@@ -9,17 +9,20 @@ type Theme = "light" | "dark";
 type MainLayoutProps = {
   theme: Theme;
   onToggleTheme: () => void;
+  onSignedOut: () => void;
 };
 
 function MainLayout({
   theme,
   onToggleTheme,
+  onSignedOut,
 }: MainLayoutProps) {
   return (
     <>
       <Navbar
         theme={theme}
         onToggleTheme={onToggleTheme}
+        onSignedOut={onSignedOut}
       />
 
       <Outlet />
