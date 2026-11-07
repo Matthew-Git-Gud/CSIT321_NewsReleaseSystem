@@ -1,124 +1,141 @@
-const jwt = require("jsonwebtoken");
-const pool = require("../config/database");
 
-const authenticate = async (
-  req,
-  res,
-  next,
-) => {
+const jwt = require('jsonwebtoken');
+const pool = require('../config/database');
+
+const authCookieOptions = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite:
+    process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+  path: '/',
+};
+
+const clearAuthCookie = (res) => {
+  res.clearCookie('token', authCookieOptions);
+};
+
+const authenticate = async (req, res, next) => {
+  const token = req.cookies?.token;
+
+  if (!token) {
+    return res.status(401).json({
+      message: 'Authentication required',
+    });
+  }
+
+  let decoded;
+
+  // Verify JWT separately so database errors aren't mistaken
+  // for invalid or expired authentication sessions.
   try {
-    const token =
-      req.cookies.token;
-
-    if (!token) {
-      return res.status(401).json({
-        message:
-          "Authentication required",
-      });
-    }
-
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET,
+    decoded = jwt.verify(token, process.env.JWT_SECRET);
+  } catch (error) {
+    console.warn(
+      '[Auth Middleware] JWT verification failed:',
+      error.message
     );
 
-    const [users] =
-      await pool.query(
-        `
-        SELECT
-          u.user_id,
-          u.username,
-          u.full_name,
-          u.role,
-          u.status,
-          COALESCE(up.accent_colour, 'emerald') AS accent_colour
-        FROM users AS u
-        LEFT JOIN user_preferences AS up ON up.user_id = u.user_id
-        WHERE u.user_id = ?
-        `,
-        [decoded.user_id],
-      );
+    clearAuthCookie(res);
+
+    return res.status(401).json({
+      message: 'Invalid or expired session',
+    });
+  }
+
+  try {
+    const [users] = await pool.query(
+      `
+      SELECT
+        u.user_id,
+        u.username,
+        u.full_name,
+        u.role,
+        u.status,
+        COALESCE(up.accent_colour, 'emerald') AS accent_colour
+      FROM users AS u
+      LEFT JOIN user_preferences AS up
+        ON up.user_id = u.user_id
+      WHERE u.user_id = ?
+      `,
+      [decoded.user_id]
+    );
 
     if (users.length === 0) {
-      res.clearCookie("token");
+      clearAuthCookie(res);
 
       return res.status(401).json({
-        message:
-          "User account not found",
+        message: 'User account not found',
       });
     }
 
     const user = users[0];
 
-    if (
-      user.status ===
-      "suspended"
-    ) {
-      res.clearCookie("token");
+    if (user.status === 'suspended') {
+      clearAuthCookie(res);
 
       return res.status(403).json({
-        message:
-          "Your account has been suspended",
+        message: 'Your account has been suspended',
       });
     }
 
     req.user = user;
 
-    next();
+    return next();
   } catch (error) {
-    res.clearCookie("token");
+    console.error(
+      '[Auth Middleware] Database error:',
+      error
+    );
 
-    return res.status(401).json({
-      message:
-        "Invalid or expired session",
-    });
+    return next(error);
   }
 };
 
-const optionalAuthenticate = async (
-  req,
-  res,
-  next,
-) => {
+const optionalAuthenticate = async (req, res, next) => {
+  const token = req.cookies?.token;
+
+  if (!token) {
+    req.user = null;
+    return next();
+  }
+
+  let decoded;
+
   try {
-    const token =
-      req.cookies.token;
+    decoded = jwt.verify(token, process.env.JWT_SECRET);
+  } catch (error) {
+    console.warn(
+      '[Auth Middleware] Optional JWT verification failed:',
+      error.message
+    );
 
-    // No token = guest.
-    // Continue normally.
-    if (!token) {
-      req.user = null;
-      return next();
-    }
+    clearAuthCookie(res);
+    req.user = null;
 
-    const decoded =
-      jwt.verify(
-        token,
-        process.env.JWT_SECRET,
-      );
+    return next();
+  }
 
-    const [users] =
-      await pool.query(
-        `
-        SELECT
-          u.user_id,
-          u.username,
-          u.full_name,
-          u.role,
-          u.status,
-          COALESCE(up.accent_colour, 'emerald') AS accent_colour
-        FROM users AS u
-        LEFT JOIN user_preferences AS up ON up.user_id = u.user_id
-        WHERE u.user_id = ?
-        LIMIT 1
-        `,
-        [decoded.user_id],
-      );
+  try {
+    const [users] = await pool.query(
+      `
+      SELECT
+        u.user_id,
+        u.username,
+        u.full_name,
+        u.role,
+        u.status,
+        COALESCE(up.accent_colour, 'emerald') AS accent_colour
+      FROM users AS u
+      LEFT JOIN user_preferences AS up
+        ON up.user_id = u.user_id
+      WHERE u.user_id = ?
+      LIMIT 1
+      `,
+      [decoded.user_id]
+    );
 
-    // Invalid/deleted user:
-    // treat as guest.
     if (users.length === 0) {
-      res.clearCookie("token");
+      clearAuthCookie(res);
       req.user = null;
 
       return next();
@@ -126,10 +143,8 @@ const optionalAuthenticate = async (
 
     const user = users[0];
 
-    // Suspended user:
-    // don't authenticate them.
-    if (user.status === "suspended") {
-      res.clearCookie("token");
+    if (user.status === 'suspended') {
+      clearAuthCookie(res);
       req.user = null;
 
       return next();
@@ -145,12 +160,12 @@ const optionalAuthenticate = async (
 
     return next();
   } catch (error) {
-    // Expired/invalid token:
-    // continue as guest.
-    res.clearCookie("token");
-    req.user = null;
+    console.error(
+      '[Auth Middleware] Optional authentication database error:',
+      error
+    );
 
-    return next();
+    return next(error);
   }
 };
 
