@@ -1,4 +1,5 @@
-const READY_URL = "http://localhost:3000/api/health/ready";
+import { API_BASE_URL as BACKEND_BASE_URL } from './apiConfig';
+const READY_URL = `${BACKEND_BASE_URL}/api/health/ready`;
 
 export async function waitForBackend(timeoutMs = 30000): Promise<void> {
   const deadline = Date.now() + timeoutMs;

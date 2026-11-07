@@ -1,3 +1,4 @@
+import { API_BASE_URL as BACKEND_BASE_URL } from './apiConfig';
 export type AdminCategory = {
   category_id: number;
   name: string;
@@ -37,7 +38,7 @@ export type AdminUser = {
 };
 
 const API_URL =
-  "http://localhost:3000/api/admin";
+  `${BACKEND_BASE_URL}/api/admin`;
 
 export async function getAdminUsers(
   search = "",
@@ -56,7 +57,7 @@ export async function getAdminUsers(
     params.toString();
 
   const response = await fetch(
-    `http://localhost:3000/api/admin/users${
+    `${BACKEND_BASE_URL}/api/admin/users${
       query ? `?${query}` : ""
     }`,
     {
@@ -82,7 +83,7 @@ export async function updateUserStatus(
   status: "active" | "suspended",
 ): Promise<void> {
   const response = await fetch(
-    `http://localhost:3000/api/admin/users/${userId}/status`,
+    `${BACKEND_BASE_URL}/api/admin/users/${userId}/status`,
     {
       method: "PUT",
 
@@ -181,7 +182,7 @@ export async function deleteAdminArticle(
   articleId: number,
 ): Promise<void> {
   const response = await fetch(
-    `http://localhost:3000/api/admin/articles/${articleId}`,
+    `${BACKEND_BASE_URL}/api/admin/articles/${articleId}`,
     {
       method: "DELETE",
       credentials: "include",
@@ -231,7 +232,7 @@ export async function getAdminArticle(
   articleId: number,
 ): Promise<AdminEditableArticle> {
   const response = await fetch(
-    `http://localhost:3000/api/admin/articles/${articleId}`,
+    `${BACKEND_BASE_URL}/api/admin/articles/${articleId}`,
     {
       method: "GET",
       credentials: "include",
@@ -256,7 +257,7 @@ export async function updateAdminArticle(
   article: AdminArticleUpdate,
 ): Promise<AdminEditableArticle> {
   const response = await fetch(
-    `http://localhost:3000/api/admin/articles/${articleId}`,
+    `${BACKEND_BASE_URL}/api/admin/articles/${articleId}`,
     {
       method: "PUT",
       headers: {
@@ -317,7 +318,7 @@ export type ReportReviewStatus =
 export async function getPendingReports():
   Promise<AdminArticleReport[]> {
   const response = await fetch(
-    "http://localhost:3000/api/admin/reports",
+    `${BACKEND_BASE_URL}/api/admin/reports`,
     {
       method: "GET",
       credentials: "include",
@@ -352,7 +353,7 @@ export async function updateReportStatus(
   status: ReportReviewStatus,
 ): Promise<string> {
   const response = await fetch(
-    `http://localhost:3000/api/admin/reports/${reportId}/status`,
+    `${BACKEND_BASE_URL}/api/admin/reports/${reportId}/status`,
     {
       method: "PUT",
       headers: {

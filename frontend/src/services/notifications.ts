@@ -1,3 +1,4 @@
+import { API_BASE_URL as BACKEND_BASE_URL } from './apiConfig';
 export type Notification = {
  notification_id: number;
  user_id: number;
@@ -9,7 +10,7 @@ export type Notification = {
  created_at: string;
  read_at: string | null;
 };
-const BASE = 'http://localhost:3000/api/notifications';
+const BASE = `${BACKEND_BASE_URL}/api/notifications`;
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
  const response = await fetch(`${BASE}${path}`, { credentials: 'include', ...options });
  if (!response.ok) throw new Error(`Notification API failed: ${response.status}`);

@@ -1,4 +1,5 @@
-const API_BASE = "http://localhost:3000/api";
+import { API_BASE_URL as BACKEND_BASE_URL } from './apiConfig';
+const API_BASE = `${BACKEND_BASE_URL}/api`;
 
 export type CoverPromptResult = { style: "photorealistic" | "editorial_illustration"; imagePrompt: string };
 export type CoverImageResult = { imageDataUrl: string; width: number; height: number };

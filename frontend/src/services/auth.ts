@@ -1,3 +1,4 @@
+import { API_BASE_URL as BACKEND_BASE_URL } from './apiConfig';
 import type { AccentColour } from "../constants/appearance";
 
 export type User = {
@@ -8,7 +9,7 @@ export type User = {
   accent_colour?: AccentColour
 }
 
-const API_URL = 'http://localhost:3000/api/auth'
+const API_URL = `${BACKEND_BASE_URL}/api/auth`
 
 type RegisterData = {
   full_name: string

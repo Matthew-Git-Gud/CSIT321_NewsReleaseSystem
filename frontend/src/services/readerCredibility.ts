@@ -1,7 +1,8 @@
+import { API_BASE_URL as BACKEND_BASE_URL } from './apiConfig';
 
 import type { CredibilityAssessment } from './aiCredibility';
 
-const API_BASE = 'http://localhost:3000/api';
+const API_BASE = `${BACKEND_BASE_URL}/api`;
 
 export type ReaderCredibilityResult = {
   status: 'not_started' | 'pending' | 'completed' | 'failed';

@@ -1,3 +1,4 @@
+import { API_BASE_URL as BACKEND_BASE_URL } from './apiConfig';
 export type CredibilityClaim = {
   claim: string;
   status: 'supported' | 'not_verified' | 'contradicted' | 'opinion_or_non_factual';
@@ -30,7 +31,7 @@ export type CredibilityQueueItem = {
   };
 };
 
-const API = 'http://localhost:3000/api/admin/credibility';
+const API = `${BACKEND_BASE_URL}/api/admin/credibility`;
 
 export async function getCredibilityQueue(): Promise<CredibilityQueueItem[]> {
   const response = await fetch(API, { credentials: 'include' });

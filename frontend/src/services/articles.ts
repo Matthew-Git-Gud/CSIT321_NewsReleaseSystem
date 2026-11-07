@@ -1,4 +1,5 @@
-const API_URL = "http://localhost:3000/api/articles";
+import { API_BASE_URL as BACKEND_BASE_URL } from './apiConfig';
+const API_URL = `${BACKEND_BASE_URL}/api/articles`;
 
 export type ArticleStatus =
   | "draft"
@@ -190,7 +191,7 @@ export async function getArticleById(
 
 export async function getPersonalisedFeed(): Promise<Article[]> {
   const response = await fetch(
-    "http://localhost:3000/api/articles/feed",
+    `${BACKEND_BASE_URL}/api/articles/feed`,
     {
       method: "GET",
       credentials: "include",

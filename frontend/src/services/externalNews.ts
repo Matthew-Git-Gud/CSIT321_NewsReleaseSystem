@@ -1,4 +1,5 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+import { API_BASE_URL as BACKEND_BASE_URL } from './apiConfig';
+const API_BASE_URL = BACKEND_BASE_URL;
 
 export type ExternalArticle = {
   id: number; title: string; description: string | null;

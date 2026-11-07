@@ -1,9 +1,10 @@
+import { API_BASE_URL as BACKEND_BASE_URL } from './apiConfig';
 import type {
   ArticlePreview,
 } from "./articles";
 
 const API_URL =
-  "http://localhost:3000/api";
+  `${BACKEND_BASE_URL}/api`;
 
 export type SavedArticle =
   ArticlePreview & {

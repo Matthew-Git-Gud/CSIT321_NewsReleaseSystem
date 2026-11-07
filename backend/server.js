@@ -13,7 +13,7 @@ const { initializeSocketServer } = require('./config/socket');
 const app = express();
 
 const PORT = Number(process.env.PORT) || 3000;
-const FRONTEND_ORIGIN = 'http://localhost:5173';
+const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || 'http://localhost:5173';
 
 // =========================
 // EXPRESS MIDDLEWARE

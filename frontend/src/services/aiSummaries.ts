@@ -1,4 +1,5 @@
-const BASE = 'http://localhost:3000/api/articles';
+import { API_BASE_URL as BACKEND_BASE_URL } from './apiConfig';
+const BASE = `${BACKEND_BASE_URL}/api/articles`;
 
 export type AiSummary = { articleId: number; summary: string | null; cached: boolean };
 

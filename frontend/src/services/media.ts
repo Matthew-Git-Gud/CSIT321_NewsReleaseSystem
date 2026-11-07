@@ -1,4 +1,5 @@
-const API_BASE = "http://localhost:3000/api";
+import { API_BASE_URL as BACKEND_BASE_URL } from './apiConfig';
+const API_BASE = `${BACKEND_BASE_URL}/api`;
 export type MediaResult = { url: string; type: "image" | "video" };
 export async function uploadArticleMedia(file: File): Promise<MediaResult> {
   const data = new FormData();

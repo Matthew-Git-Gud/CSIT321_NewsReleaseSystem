@@ -1,3 +1,4 @@
+import { API_BASE_URL as BACKEND_BASE_URL } from './apiConfig';
 import {
   DEFAULT_ACCENT_COLOUR,
   isAccentColour,
@@ -5,7 +6,7 @@ import {
 } from "../constants/appearance";
 
 const API_URL =
-  "http://localhost:3000/api/preferences";
+  `${BACKEND_BASE_URL}/api/preferences`;
 
 export type Category = {
   category_id: number;

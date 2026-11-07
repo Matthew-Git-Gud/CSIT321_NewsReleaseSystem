@@ -1,6 +1,7 @@
+import { API_BASE_URL as BACKEND_BASE_URL } from './apiConfig';
 export type ChatMessage={role:'user'|'assistant';content:string};
 export type ChatArticle={title:string;url:string;source:string};
-const BASE=import.meta.env.VITE_API_BASE_URL||'http://localhost:3000';
+const BASE = BACKEND_BASE_URL;
 
 async function request(path:string,init?:RequestInit){
  const r=await fetch(`${BASE}/api/chat${path}`,{

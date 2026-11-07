@@ -1,5 +1,6 @@
+import { API_BASE_URL as BACKEND_BASE_URL } from './apiConfig';
 const API_URL =
-  "http://localhost:3000/api/categories";
+  `${BACKEND_BASE_URL}/api/categories`;
 
 export type Category = {
   category_id: number;

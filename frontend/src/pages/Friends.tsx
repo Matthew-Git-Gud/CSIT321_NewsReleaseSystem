@@ -1,3 +1,4 @@
+import { API_BASE_URL as BACKEND_BASE_URL } from '../services/apiConfig';
 import { useCallback, useEffect, useState } from 'react';
 import '../styles/Friends.css';
 
@@ -6,7 +7,7 @@ type Friend = Person & { friendship_id: number; friends_since?: string };
 type Request = Person & { friendship_id: number; requester_id: number; addressee_id: number; created_at: string; status: 'pending' };
 type Requests = { incoming: Request[]; outgoing: Request[] };
 
-const BASE = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api').replace(/\/$/, '');
+const BASE = `${BACKEND_BASE_URL}/api`;
 async function api<T>(path: string, options: RequestInit = {}): Promise<T> {
   const response = await fetch(`${BASE}${path}`, {
     ...options,

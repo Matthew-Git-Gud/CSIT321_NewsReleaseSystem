@@ -1,3 +1,4 @@
+import { API_BASE_URL as BACKEND_BASE_URL } from './apiConfig';
 export type ArticleRating = {
   averageRating: number;
   ratingCount: number;
@@ -15,7 +16,7 @@ export async function getArticleRating(
   articleId: number,
 ): Promise<ArticleRating> {
   const response = await fetch(
-    `http://localhost:3000/api/articles/${articleId}/rating`,
+    `${BACKEND_BASE_URL}/api/articles/${articleId}/rating`,
     {
       method: "GET",
       credentials: "include",
@@ -39,7 +40,7 @@ export async function rateArticle(
   rating: number,
 ): Promise<RateArticleResponse> {
   const response = await fetch(
-    `http://localhost:3000/api/articles/${articleId}/rating`,
+    `${BACKEND_BASE_URL}/api/articles/${articleId}/rating`,
     {
       method: "PUT",
       headers: {

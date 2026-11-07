@@ -1,4 +1,5 @@
-const API_BASE = "http://localhost:3000/api";
+import { API_BASE_URL as BACKEND_BASE_URL } from './apiConfig';
+const API_BASE = `${BACKEND_BASE_URL}/api`;
 
 export type CredibilityClassification = "supported" | "insufficient_evidence" | "partially_supported" | "contradictory";
 export type ClaimStatus = "supported" | "not_verified" | "contradicted" | "opinion_or_non_factual";

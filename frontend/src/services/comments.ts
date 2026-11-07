@@ -1,5 +1,6 @@
+import { API_BASE_URL as BACKEND_BASE_URL } from './apiConfig';
 const API_URL =
-  "http://localhost:3000/api";
+  `${BACKEND_BASE_URL}/api`;
 
 export type Comment = {
   comment_id: number;

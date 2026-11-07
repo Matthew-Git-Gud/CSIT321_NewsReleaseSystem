@@ -1,3 +1,4 @@
+import { API_BASE_URL as BACKEND_BASE_URL } from './apiConfig';
 export type ReportReason =
   | "misinformation"
   | "inappropriate"
@@ -29,7 +30,7 @@ export async function reportArticle(
   report: CreateReportData,
 ): Promise<CreateReportResponse> {
   const response = await fetch(
-    `http://localhost:3000/api/articles/${articleId}/reports`,
+    `${BACKEND_BASE_URL}/api/articles/${articleId}/reports`,
     {
       method: "POST",
       headers: {
@@ -61,7 +62,7 @@ export async function getReportStatus(
   articleId: number,
 ): Promise<ReportStatus> {
   const response = await fetch(
-    `http://localhost:3000/api/articles/${articleId}/report-status`,
+    `${BACKEND_BASE_URL}/api/articles/${articleId}/report-status`,
     {
       method: "GET",
       credentials: "include",

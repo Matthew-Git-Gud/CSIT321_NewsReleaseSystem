@@ -1,4 +1,5 @@
-const API = 'http://localhost:3000/api';
+import { API_BASE_URL as BACKEND_BASE_URL } from './apiConfig';
+const API = `${BACKEND_BASE_URL}/api`;
 async function parse(response: Response) {
  const body = await response.json().catch(() => ({}));
  if (!response.ok) throw new Error(body.message || `Request failed (${response.status})`);
