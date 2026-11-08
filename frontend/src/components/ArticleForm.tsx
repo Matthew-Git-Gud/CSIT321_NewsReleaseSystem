@@ -534,8 +534,7 @@ function ArticleForm({
           className="article-sources-textarea"
           value={sourceText}
           onChange={(event) => { setSourceText(event.target.value); setSourceError(""); setCredibilityReport(null); setCredibilityReportKey(null); }}
-          placeholder={"https://example.com/news/article-1
-https://example.com/news/article-2"}
+          placeholder={"https://example.com/news/article-1https://example.com/news/article-2"}
           rows={5}
           disabled={loading}
         />
