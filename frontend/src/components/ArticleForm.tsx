@@ -247,8 +247,7 @@ function ArticleForm({
 
   const getSourceUrls = (): string[] | null => {
     const entries = sourceText
-      .split(/\r?
-/)
+      .split(/\r?/)
       .map((url) => url.trim())
       .filter(Boolean);
     const invalid = entries.find((url) => !isValidSourceUrl(url));
