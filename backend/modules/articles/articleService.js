@@ -1,19 +1,45 @@
 const repository = require('./articleRepository');
 const credibilityAutomation = require('../ai/aiCredibilityAutomation');
+const credibilityService = require('../ai/aiCredibilityService');
+const credibilityRepository = require('../ai/aiCredibilityRepository');
 
 class ArticleError extends Error {
   constructor(status, message) {
     super(message);
-    this.name = 'ArticleError';
     this.status = status;
   }
 }
 
 const requireFields = ({ title, summary, content, category_id }) => {
-  // Preserve the existing controller's required-field semantics.
   if (!title || !summary || !content || !category_id) {
     throw new ArticleError(400, 'Title, summary, content and category are required');
   }
+};
+
+const validatePublishRequirements = ({ content, featured_image_url }) => {
+  if (!featured_image_url || !String(featured_image_url).trim()) {
+    throw new ArticleError(400, 'A cover image is required before publishing');
+  }
+  const sources = require('../ai/credibilitySourceService').extractSourceUrlsFromArticle(content);
+  if (!sources.length) {
+    throw new ArticleError(400, 'At least one cited source is required before publishing');
+  }
+};
+
+const runRequiredCredibilityAnalysis = async ({ title, content }) => {
+  try {
+    return await credibilityService.analyseArticleCredibility({ title, content });
+  } catch (error) {
+    throw new ArticleError(
+      error.status || 502,
+      `Credibility analysis must complete before publishing: ${error.message || 'Analysis unavailable'}`
+    );
+  }
+};
+
+const saveRequiredAssessment = async (article, report) => {
+  const contentHash = credibilityAutomation.getArticleContentHash(article);
+  await credibilityRepository.saveAssessment(article.article_id, contentHash, report);
 };
 
 const createArticle = async (body, authorId) => {
@@ -22,15 +48,27 @@ const createArticle = async (body, authorId) => {
   if (!await repository.findCategory(body.category_id)) {
     throw new ArticleError(400, 'Invalid category');
   }
+
+  let credibilityReport = null;
+  if (status === 'published') {
+    validatePublishRequirements(body);
+    credibilityReport = await runRequiredCredibilityAnalysis({
+      title: body.title.trim(),
+      content: body.content.trim(),
+    });
+  }
+
   const id = await repository.insertArticle({
     authorId, category_id: body.category_id,
     title: body.title.trim(), summary: body.summary.trim(),
     content: body.content.trim(), featured_image_url: body.featured_image_url || null, status,
   });
   const article = await repository.findCreatedArticle(id);
-  if (status === 'published' && article) {
-    credibilityAutomation.scheduleArticleAnalysis(article);
+
+  if (status === 'published' && article && credibilityReport) {
+    await saveRequiredAssessment(article, credibilityReport);
   }
+
   return {
     message: status === 'published' ? 'Article published successfully' : 'Draft saved successfully',
     article,
@@ -59,15 +97,26 @@ const updateArticle = async (articleId, authorId, body) => {
   if (!await repository.findCategory(body.category_id)) {
     throw new ArticleError(400, 'Invalid category');
   }
+
+  let credibilityReport = null;
+  if (body.status === 'published') {
+    validatePublishRequirements(body);
+    credibilityReport = await runRequiredCredibilityAnalysis({
+      title: body.title.trim(),
+      content: body.content.trim(),
+    });
+  }
+
   const affected = await repository.update(articleId, authorId, {
     title: body.title.trim(), summary: body.summary.trim(),
     content: body.content.trim(), featured_image_url: body.featured_image_url || null, category_id: body.category_id,
     status: body.status,
   });
   if (!affected) throw new ArticleError(404, 'Article not found');
-  if (body.status === 'published') {
+
+  if (body.status === 'published' && credibilityReport) {
     const article = await repository.findCredibilityArticle(articleId, authorId);
-    if (article) credibilityAutomation.scheduleArticleAnalysis(article);
+    if (article) await saveRequiredAssessment(article, credibilityReport);
   }
   return { message: 'Article updated successfully' };
 };
@@ -78,23 +127,16 @@ const getArticleById = async articleId => {
   return { article };
 };
 
-// Only expose a safe, lightweight cover URL to listing pages. The full article
-// content remains available from the individual article endpoint instead.
 const getCoverImageUrl = content => {
   if (typeof content !== 'string') return null;
-
-  const imageMatch = content.match(/<img\b[^>]*\bsrc\s*=\s*["']([^"']+)["']/i);
+  const imageMatch = content.match(/<img\\b[^>]*\\bsrc\\s*=\\s*["']([^"']+)["']/i);
   if (!imageMatch) return null;
-
   const source = imageMatch[1].trim();
-
-  // Article media may be local project assets, uploaded media, or a normal HTTP(S) URL.
   return /^(https?:\/\/|\/api\/media\/|\/article-covers\/)/i.test(source) ? source : null;
 };
 
 const getPublishedArticles = async () => {
   const articles = await repository.findPublished();
-
   return {
     articles: articles.map(({ content, ...article }) => ({
       ...article,

@@ -114,6 +114,7 @@ function ArticleForm({
   const [credibilityLoading, setCredibilityLoading] = useState(false);
   const [credibilityError, setCredibilityError] = useState("");
   const [credibilityReport, setCredibilityReport] = useState<CredibilityAssessment | null>(null);
+  const [credibilityReportKey, setCredibilityReportKey] = useState<string | null>(null);
 
   const [featuredImageUrl, setFeaturedImageUrl] = useState(
     initialValues?.featured_image_url ?? "",
@@ -246,7 +247,8 @@ function ArticleForm({
 
   const getSourceUrls = (): string[] | null => {
     const entries = sourceText
-      .split(/\r?\n/)
+      .split(/\r?
+/)
       .map((url) => url.trim())
       .filter(Boolean);
     const invalid = entries.find((url) => !isValidSourceUrl(url));
@@ -262,6 +264,13 @@ function ArticleForm({
     setSourceError("");
     return entries;
   };
+
+  const getCredibilityInputKey = () =>
+    JSON.stringify({
+      title: title.trim(),
+      content: content.trim(),
+      sources: sourceText.split(/\r?\n/).map((url) => url.trim()).filter(Boolean),
+    });
 
   const handleCredibilityAnalysis = async () => {
     if (!title.trim()) {
@@ -289,6 +298,7 @@ function ArticleForm({
       const articleHtml = buildArticleContent(content.trim(), urls);
       const report = await analyseArticleCredibility({ title: title.trim(), content: articleHtml });
       setCredibilityReport(report);
+      setCredibilityReportKey(getCredibilityInputKey());
     } catch (error) {
       setCredibilityError(error instanceof Error ? error.message : "Unable to analyse article credibility.");
     } finally {
@@ -301,6 +311,36 @@ function ArticleForm({
   ) => {
     const urls = getSourceUrls();
     if (urls === null) return;
+
+    if (status === "published") {
+      if (!urls.length) {
+        setSourceError("At least one cited source is required before publishing.");
+        return;
+      }
+      if (!featuredImageUrl.trim()) {
+        setCoverError("A cover image is required before publishing.");
+        return;
+      }
+      if (!credibilityReport || credibilityReportKey !== getCredibilityInputKey()) {
+        setCredibilityLoading(true);
+        setCredibilityError("");
+        try {
+          const articleHtml = buildArticleContent(content.trim(), urls);
+          const report = await analyseArticleCredibility({
+            title: title.trim(),
+            content: articleHtml,
+          });
+          setCredibilityReport(report);
+          setCredibilityReportKey(getCredibilityInputKey());
+        } catch (error) {
+          setCredibilityError(error instanceof Error ? error.message : "Credibility analysis is required before publishing.");
+          return;
+        } finally {
+          setCredibilityLoading(false);
+        }
+      }
+    }
+
     await onSubmit({
       title: title.trim(),
 
@@ -473,7 +513,7 @@ function ArticleForm({
         {coverGenerating && <p className="field-helper">Creating an image prompt and generating your cover. This may take a little while...</p>}
         <small className="field-helper">AI generations used: {coverGenerations}/3 for this editing session.</small>
         {coverError && <p className="form-error">{coverError}</p>}
-        <small className="field-helper">Recommended: landscape image, ideally 16:9. You can publish without a cover image.</small>
+        <small className="field-helper">Required for publication. Recommended: landscape image, ideally 16:9.</small>
       </section>
 
       <div className="form-group">
@@ -483,7 +523,7 @@ function ArticleForm({
 
         <RichTextEditor
           value={content}
-          onChange={setContent}
+          onChange={(value) => { setContent(value); setCredibilityReport(null); setCredibilityReportKey(null); }}
         />
       </div>
 
@@ -494,20 +534,21 @@ function ArticleForm({
           id="article-sources-heading"
           className="article-sources-textarea"
           value={sourceText}
-          onChange={(event) => { setSourceText(event.target.value); setSourceError(""); }}
-          placeholder={"https://example.com/news/article-1\nhttps://example.com/news/article-2"}
+          onChange={(event) => { setSourceText(event.target.value); setSourceError(""); setCredibilityReport(null); setCredibilityReportKey(null); }}
+          placeholder={"https://example.com/news/article-1
+https://example.com/news/article-2"}
           rows={5}
           disabled={loading}
         />
         {sourceError && <p className="form-error">{sourceError}</p>}
-        <small className="field-helper">You can include multiple sources. Each URL must start with http:// or https://. References are optional.</small>
+        <small className="field-helper">You can include multiple sources. Each URL must start with http:// or https://. At least one valid source is required for publication.</small>
       </section>
 
       <section className="form-group credibility-section" aria-labelledby="credibility-heading">
         <div className="credibility-heading-row">
           <div>
             <label id="credibility-heading">AI Credibility Analysis</label>
-            <p className="field-helper">Compare factual claims in this article against the cited sources. Results are advisory and do not automatically affect publication.</p>
+            <p className="field-helper">Compare factual claims in this article against the cited sources. A completed assessment is required before publication. Findings are advisory and do not automatically determine whether an article is credible.</p>
           </div>
           <button
             type="button"
@@ -518,7 +559,7 @@ function ArticleForm({
             {credibilityLoading ? "Analysing..." : "Analyse credibility"}
           </button>
         </div>
-        {credibilityLoading && <p className="field-helper">Retrieving cited webpages and comparing article claims. This may take a little while.</p>}
+        {credibilityLoading && <p className="field-helper">Credibility analysis is required before publication. Retrieving cited webpages and comparing article claims...</p>}
         {credibilityError && <p className="form-error" role="alert">{credibilityError}</p>}
         {credibilityReport && (
           <div className="credibility-report" aria-live="polite">
