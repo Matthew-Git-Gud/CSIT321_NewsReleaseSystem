@@ -246,8 +246,10 @@ function ArticleForm({
   };
 
   const getSourceUrls = (): string[] | null => {
+    // Each source occupies one textarea line. Splitting on newlines keeps a full
+    // URL together rather than validating its individual characters.
     const entries = sourceText
-      .split(/\r?/)
+      .split(/\r?\n/)
       .map((url) => url.trim())
       .filter(Boolean);
     const invalid = entries.find((url) => !isValidSourceUrl(url));
@@ -534,7 +536,7 @@ function ArticleForm({
           className="article-sources-textarea"
           value={sourceText}
           onChange={(event) => { setSourceText(event.target.value); setSourceError(""); setCredibilityReport(null); setCredibilityReportKey(null); }}
-          placeholder={"https://example.com/news/article-1https://example.com/news/article-2"}
+          placeholder={"https://example.com/news/article-1\nhttps://example.com/news/article-2"}
           rows={5}
           disabled={loading}
         />
